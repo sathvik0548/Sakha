@@ -288,7 +288,104 @@ document.getElementById("saveBtn")?.addEventListener("click", () => saveVault(fa
 document.getElementById("demoBtn")?.addEventListener("click", fillDemoValues);
 document.getElementById("clearBtn")?.addEventListener("click", clearVault);
 
+// ---------------------------------------------------------------------------
+// Demo Mode — opens 4 local offline scenario pages and tracks state
+// ---------------------------------------------------------------------------
+const DEMO_PAGES = [
+  { url: chrome.runtime.getURL("demo/fake-kyc.html"),          label: "Fake KYC Page (Scam 🚨)" },
+  { url: chrome.runtime.getURL("demo/upi-collect-trap.html"),  label: "UPI Collect Trap (Scam 🚨)" },
+  { url: chrome.runtime.getURL("demo/genuine-service-form.html"), label: "Genuine Service Form (Safe ✅)" },
+  { url: chrome.runtime.getURL("demo/genuine-banking.html"),   label: "Genuine Banking Page (Safe ✅)" },
+];
+
+// Track tab IDs opened by demo so we can close them on reset
+let demoTabIds = [];
+
+const demoToggle     = document.getElementById("demoModeToggle");
+const demoControls   = document.getElementById("demo-controls");
+const demoStatus     = document.getElementById("demo-mode-status");
+const demoNote       = document.getElementById("demo-note");
+const demoScenarioBtn = document.getElementById("demoScenarioBtn");
+const demoResetBtn   = document.getElementById("demoResetBtn");
+
+async function applyDemoModeUI(enabled) {
+  demoControls.style.display = enabled ? "flex" : "none";
+  demoNote.style.display     = enabled ? "block" : "none";
+  demoStatus.textContent     = enabled ? "✓ Demo Mode enabled — click Run Demo Scenario to start." : "";
+}
+
+// Persist and react to toggle
+if (demoToggle) {
+  // Load saved state
+  chrome.storage.local.get(["sakha_demo_mode"], (data) => {
+    const enabled = !!data.sakha_demo_mode;
+    demoToggle.checked = enabled;
+    applyDemoModeUI(enabled);
+  });
+
+  demoToggle.addEventListener("change", () => {
+    const enabled = demoToggle.checked;
+    chrome.storage.local.set({ sakha_demo_mode: enabled });
+    applyDemoModeUI(enabled);
+    if (!enabled) {
+      // Close any open demo tabs on disable
+      closeDemoTabs();
+    }
+  });
+}
+
+// Open all 4 demo pages as tabs, sequentially with a 600 ms gap
+if (demoScenarioBtn) {
+  demoScenarioBtn.addEventListener("click", async () => {
+    demoScenarioBtn.disabled = true;
+    demoScenarioBtn.textContent = "Opening…";
+    closeDemoTabs(); // clean up previous run first
+
+    for (const page of DEMO_PAGES) {
+      await new Promise((resolve) => {
+        chrome.tabs.create({ url: page.url, active: false }, (tab) => {
+          demoTabIds.push(tab.id);
+          resolve();
+        });
+      });
+      await new Promise((r) => setTimeout(r, 600));
+    }
+
+    // Activate the first demo tab so the user sees it
+    if (demoTabIds[0]) {
+      chrome.tabs.update(demoTabIds[0], { active: true });
+    }
+
+    demoScenarioBtn.disabled = false;
+    demoScenarioBtn.textContent = "▶ Run Demo Scenario";
+    demoStatus.textContent = "✓ Demo open — check the 4 new tabs. Sakha will analyze each page.";
+  });
+}
+
+// Close all demo tabs and reset state
+function closeDemoTabs() {
+  if (demoTabIds.length > 0) {
+    chrome.tabs.remove(demoTabIds.filter(Boolean), () => {
+      chrome.runtime.lastError; // suppress "tab not found" errors
+    });
+    demoTabIds = [];
+  }
+}
+
+if (demoResetBtn) {
+  demoResetBtn.addEventListener("click", () => {
+    closeDemoTabs();
+    demoToggle.checked = false;
+    chrome.storage.local.set({ sakha_demo_mode: false });
+    applyDemoModeUI(false);
+    demoStatus.textContent = "Demo reset. All demo tabs closed.";
+    setTimeout(() => { demoStatus.textContent = ""; }, 3000);
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Run load immediately
+// ---------------------------------------------------------------------------
 loadVault();
 
 // Also run on DOMContentLoaded or window load in case DOM was parsing

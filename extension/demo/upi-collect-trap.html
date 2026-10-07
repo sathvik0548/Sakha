@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Receive Your Cashback — upi-rewards-claim.xyz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #fff8e1; color: #222; }
+    header {
+      background: #1a237e; color: white; padding: 14px 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    header .logo { font-size: 20px; font-weight: bold; }
+    .hero {
+      background: linear-gradient(135deg, #43a047, #1b5e20);
+      color: white; text-align: center; padding: 32px 24px;
+    }
+    .hero h1 { font-size: 26px; font-weight: bold; margin-bottom: 8px; }
+    .hero p { font-size: 15px; color: #c8e6c9; }
+    .amount-badge {
+      display: inline-block; background: #fff176; color: #1b5e20;
+      font-size: 32px; font-weight: bold; border-radius: 8px;
+      padding: 10px 28px; margin: 16px 0;
+    }
+    .container { max-width: 480px; margin: 28px auto; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); padding: 28px; }
+    h2 { font-size: 18px; margin-bottom: 8px; color: #1a237e; }
+    p.note { font-size: 12px; color: #666; margin-bottom: 20px; background: #f3f4f6; border-radius: 4px; padding: 8px 12px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; margin-top: 16px; }
+    input {
+      width: 100%; padding: 10px 12px; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 14px;
+    }
+    .pin-warn {
+      background: #ffebee; border: 1px solid #ef9a9a; border-radius: 6px;
+      padding: 12px; margin-top: 16px; font-size: 13px; color: #b71c1c;
+    }
+    .submit-btn {
+      display: block; width: 100%; margin-top: 24px; padding: 14px;
+      background: #43a047; color: white; font-size: 16px; font-weight: bold;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    .submit-btn:hover { background: #2e7d32; }
+    .timer { text-align: center; font-size: 13px; color: #d32f2f; font-weight: bold; margin-top: 16px; }
+    .footer { text-align: center; font-size: 11px; color: #999; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <!-- SAKHA DEMO: SCENARIO 2 — UPI Collect Request / PIN trap (scam) -->
+  <header>
+    <div class="logo">🎉 UPI Rewards Central</div>
+  </header>
+  <div class="hero">
+    <h1>Congratulations! You Won!</h1>
+    <p>Your UPI ID has been selected for a special cashback bonus</p>
+    <div class="amount-badge">₹2,500</div>
+    <p>Claim within the next 10 minutes or it expires!</p>
+  </div>
+  <div class="container">
+    <h2>Enter Details to Receive Money</h2>
+    <p class="note">
+      ℹ️ To transfer the cashback directly to your UPI account, we need to verify your identity.
+      Enter your UPI PIN below — this is required to <strong>receive</strong> money.
+    </p>
+
+    <label for="upi-name">Your Full Name</label>
+    <input type="text" id="upi-name" placeholder="Lakshmi Devi" />
+
+    <label for="upi-id">Your UPI ID</label>
+    <input type="text" id="upi-id" placeholder="lakshmi@okhdfcbank" />
+
+    <label for="upi-mobile">Registered Mobile</label>
+    <input type="tel" id="upi-mobile" placeholder="9876543210" />
+
+    <div class="pin-warn">
+      🔑 <strong>Enter your UPI PIN to receive ₹2,500 cashback now!</strong><br/>
+      <small>Your PIN is needed to authorize the incoming transfer. No charges will be made.</small>
+    </div>
+
+    <label for="upi-pin">UPI PIN (4 or 6 digits)</label>
+    <input type="password" id="upi-pin" placeholder="Enter UPI PIN" maxlength="6" />
+
+    <button class="submit-btn" id="upi-submit-btn">Receive ₹2,500 Now</button>
+    <div class="timer" id="countdown-timer">⏰ Offer expires in: 09:47</div>
+    <div class="footer">upi-rewards-claim.xyz · Not affiliated with NPCI or BHIM</div>
+  </div>
+
+  <script>
+    // Countdown timer (demo decoration only)
+    let seconds = 587;
+    const timerEl = document.getElementById("countdown-timer");
+    setInterval(() => {
+      if (seconds > 0) {
+        seconds--;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        timerEl.textContent = `⏰ Offer expires in: ${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

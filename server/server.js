@@ -122,12 +122,42 @@ app.get([
 let demoMetrics = {
   runs: 0,
   totalLatency: 0,
-  manifestRegions: 0,
-};
+// ---------------------------------------------------------------------------
+// POST /api/explain — Senior citizen plain language explanation (Masked Text Only)
+// ---------------------------------------------------------------------------
+app.post("/api/explain", async (req, res) => {
+  const { text = "", lang = "en" } = req.body;
+  if (!text) {
+    return res.status(400).json({ error: "No text provided" });
+  }
 
-// ---------------------------------------------------------------------------
-// POST /analyze
-// ---------------------------------------------------------------------------
+  console.log(`[Server] /api/explain called. Lang: ${lang}, Masked Text Length: ${text.length}`);
+
+  // Senior-friendly prompt generator
+  const isTelugu = lang === "te";
+  const systemPrompt = isTelugu
+    ? "మీరు వృద్ధులకు సహాయం చేసే స్నేహపూర్వక డిజిటల్ సహాయకుడు. ఈ పేజీ వినియోగదారుడిని ఏమి అడుగుతోందో చాలా సులభమైన తెలుగులో 2-3 చిన్న వాక్యాలలో వివరించండి. ఎలాంటి సాంకేతిక పదాలు వాడవద్దు."
+    : "You are a gentle assistant helping senior citizens understand digital pages. Explain in 2-3 simple sentences what this page is asking the user to do. Avoid all technical jargon.";
+
+  try {
+    if (activeProvider && typeof activeProvider.generateText === "function") {
+      const response = await activeProvider.generateText(`${systemPrompt}\n\nPage text:\n${text}`);
+      return res.json({ explanation: response });
+    }
+  } catch (err) {
+    console.warn("[Server] LLM Provider explain failed, falling back to heuristic summary:", err.message);
+  }
+
+  // Robust deterministic fallback summary (Cold-start or offline safe)
+  let fallback;
+  if (isTelugu) {
+    fallback = "ఈ పేజీ మీ వివరాలను (పేరు లేదా చెల్లింపు సమాచారం) అడుగుతోంది. మీరు అధికారిక సైట్‌లో ఉన్నారని ధృవీకరించుకోండి మరియు ఎవరితోనూ పాస్‌వర్డ్ లేదా పిన్ పంచుకోవద్దు.";
+  } else {
+    fallback = "This page is requesting information from you. Please ensure this is an official trusted website, and never share any passwords or PIN numbers.";
+  }
+
+  return res.json({ explanation: fallback });
+});
 
 app.post("/analyze", async (req, res) => {
   try {

@@ -1,439 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Browser Agent: Precision Redaction</title>
-    <style>
-      /* ── Clinical Reset ── */
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sakha (సఖ)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      body {
-        width: 480px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background: #f8f9fa;
-        color: #212529;
-        padding: 16px;
-        border-top: 4px solid #343a40;
-      }
+    body {
+      width: 380px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 18px;
+    }
 
-      /* ── Header & Icon ── */
-      header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #dee2e6;
-        padding-bottom: 12px;
-      }
-      .icon {
-        width: 32px; height: 32px;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0;
-      }
-      /* SVG Eye with strike */
-      .icon svg { width: 28px; height: 28px; fill: #212529; }
-      
-      header h1  { font-size: 14px; font-weight: 600; color: #212529; text-transform: uppercase; letter-spacing: 0.5px; }
-      header p   { font-size: 11px; color: #6c757d; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
 
-      /* ── Pipeline Strip ── */
-      .pipeline {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 20px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 11px;
-        position: relative;
-      }
-      .pipeline::before {
-        content: "";
-        position: absolute;
-        top: 50%; left: 0; right: 0;
-        height: 1px;
-        background: #dee2e6;
-        z-index: 1;
-      }
-      .stage {
-        background: #f8f9fa;
-        padding: 4px 8px;
-        color: #adb5bd;
-        border: 1px solid #dee2e6;
-        z-index: 2;
-        border-radius: 2px;
-        transition: all 0.2s ease;
-      }
-      .stage.active {
-        background: #f59e0b;
-        color: #fff;
-        border-color: #d97706;
-        font-weight: bold;
-      }
-      .stage.done {
-        color: #495057;
-        border-color: #ced4da;
-      }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-      /* ── Inputs & Buttons ── */
-      .control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      input[type="text"] {
-        width: 100%;
-        padding: 10px;
-        border-radius: 2px;
-        border: 1px solid #ced4da;
-        background: #fff;
-        color: #212529;
-        font-size: 13px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      }
-      input[type="text"]:focus {
-        outline: none;
-        border-color: #f59e0b;
-      }
-      
-      .btn-row { display: flex; gap: 8px; }
-      button {
-        flex: 1;
-        padding: 10px 0;
-        border: 1px solid #343a40;
-        border-radius: 2px;
-        background: #fff;
-        color: #343a40;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.1s;
-      }
-      button:hover:not(:disabled) {
-        background: #f8f9fa;
-      }
-      button:active:not(:disabled) {
-        background: #e9ecef;
-      }
-      button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      #analyzeBtn { background: #343a40; color: #fff; }
-      #analyzeBtn:hover:not(:disabled) { background: #212529; }
-      #demoBtn { background: #fff; color: #343a40; }
+    .brand-icon {
+      font-size: 28px;
+    }
 
-      /* ── Status & Technical Data ── */
-      #statusText {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 11px;
-        color: #495057;
-        padding: 8px 10px;
-        background: #e9ecef;
-        border: 1px solid #ced4da;
-        border-radius: 2px;
-        margin-bottom: 12px;
-        display: block;
-        word-break: break-word;
-        line-height: 1.4;
-      }
-      #statusText.error { background: #fef2f2; color: #b91c1c; border-color: #fca5a5; font-weight: 600; }
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
 
-      /* ── Progress Bar ── */
-      #modelLoadWrap {
-        display: none;
-        margin-bottom: 12px;
-        background: #fff;
-        padding: 12px;
-        border: 1px solid #ced4da;
-        border-radius: 2px;
-      }
-      #modelLoadWrap .label {
-        display: flex; justify-content: space-between;
-        font-size: 10px; color: #495057; margin-bottom: 6px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        text-transform: uppercase;
-      }
-      progress {
-        width: 100%; height: 4px; border: none;
-        background: #e9ecef;
-      }
-      progress::-webkit-progress-bar { background: #e9ecef; }
-      progress::-webkit-progress-value { background: #f59e0b; transition: width 0.1s; }
+    .brand-text p {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
 
-      /* ── Canvas wrapper ── */
-      #canvasWrap {
-        display: none;
-        margin-bottom: 12px;
-        border: 1px solid #ced4da;
-        background: #e9ecef;
-      }
-      #debugCanvas {
-        width: 100%;
-        display: block;
-      }
+    .lang-toggle select {
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      cursor: pointer;
+    }
 
-      /* ── PII Data Table (Monospace) ── */
-      #piiTable {
-        display: none;
-        background: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 2px;
-        margin-bottom: 12px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 10px;
-      }
-      #piiTable table {
-        width: 100%; border-collapse: collapse; text-align: left;
-      }
-      #piiTable th, #piiTable td {
-        padding: 6px 8px; border-bottom: 1px solid #e9ecef;
-      }
-      #piiTable th { background: #f8f9fa; font-weight: normal; color: #6c757d; }
+    .status-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 2px solid #22c55e;
+      margin-bottom: 16px;
+    }
 
-      /* ── Legend ── */
-      #legend {
-        display: none;
-        gap: 12px;
-        font-size: 10px;
-        color: #495057;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      }
-      .legend-item { display: flex; align-items: center; gap: 4px; }
-      .swatch {
-        width: 10px; height: 10px; flex-shrink: 0; border: 1px solid #adb5bd;
-      }
-      .swatch.region { background: #22c55e; }
-      .swatch.text   { background: #60a5fa; }
-      /* ── Metrics Panel ── */
-      #metricsPanel {
-        display: none;
-        margin-bottom: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 2px;
-        background: #fff;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 10px;
-      }
-      #metricsPanel .panel-header {
-        background: #f8f9fa;
-        padding: 4px 8px;
-        border-bottom: 1px solid #ced4da;
-        color: #6c757d;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 9px;
-      }
-      #metricsPanel .metrics-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-      }
-      #metricsPanel .metric-cell {
-        padding: 5px 8px;
-        border-bottom: 1px solid #f0f0f0;
-        border-right: 1px solid #f0f0f0;
-      }
-      #metricsPanel .metric-cell:nth-child(2n) { border-right: none; }
-      #metricsPanel .metric-label { color: #6c757d; font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; }
-      #metricsPanel .metric-value { color: #212529; font-weight: 700; font-size: 12px; margin-top: 1px; }
-      #metricsPanel .metric-value.good { color: #16a34a; }
-      #metricsPanel .metric-value.warn { color: #ca8a04; }
-      #metricsPanel .metric-note {
-        padding: 4px 8px;
-        color: #495057;
-        font-size: 9px;
-        border-top: 1px solid #ced4da;
-        background: #f8f9fa;
-        font-style: italic;
-      }
+    .status-card.danger {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
 
-      /* ── Leak Check Panel ── */
-      #leakPanel {
-        display: none;
-        margin-bottom: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 2px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 10px;
-        overflow: hidden;
-      }
-      #leakPanel .panel-header {
-        padding: 4px 8px;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 9px;
-      }
-      #leakPanel .leak-body {
-        padding: 6px 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 11px;
-        font-weight: 600;
-      }
-      #leakPanel .leak-dot {
-        width: 10px; height: 10px;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      #leakPanel.pass .panel-header { background: #f0fdf4; color: #15803d; }
-      #leakPanel.pass .leak-body { background: #fff; color: #15803d; }
-      #leakPanel.pass .leak-dot { background: #16a34a; }
-      #leakPanel.fail .panel-header { background: #fef2f2; color: #b91c1c; }
-      #leakPanel.fail .leak-body { background: #fef2f2; color: #b91c1c; }
-      #leakPanel.fail .leak-dot { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.25); }
-      #leakPanel.warn .panel-header { background: #fefce8; color: #ca8a04; }
-      #leakPanel.warn .leak-body { background: #fefce8; color: #ca8a04; }
-      #leakPanel.warn .leak-dot { background: #eab308; }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <!-- Eye with redaction strike -->
-          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" opacity="0.3"/>
-          <path d="M12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" opacity="0.3"/>
-          <rect x="2" y="10" width="20" height="4" fill="#f59e0b" />
-        </svg>
-      </div>
-      <div>
-        <h1>Redaction Agent</h1>
-        <p>FLORENCE-2 / LOCAL WEBGPU</p>
-      </div>
-      <button id="openVaultBtn" style="margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 5px 9px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; cursor: pointer; color: #334155; font-family: ui-monospace, monospace;" title="Open local profile vault">⚙ Profile</button>
-    </header>
+    .status-card.caution {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
 
-    <div class="pipeline">
-      <div class="stage" id="stage-capture">CAP</div>
-      <div class="stage" id="stage-detect">DET</div>
-      <div class="stage" id="stage-redact">RED</div>
-      <div class="stage" id="stage-send">SND</div>
-      <div class="stage" id="stage-act">ACT</div>
-    </div>
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
 
-    <!-- Server Endpoint Setting (Render Default / Overridable) -->
-    <div style="margin-bottom: 10px; padding: 8px 10px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; font-family: ui-monospace, monospace;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
-        <span style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Server URL</span>
-        <button id="resetServerBtn" style="font-size: 9px; padding: 2px 6px; border: 1px solid #cbd5e1; border-radius: 3px; background: #f8fafc; color: #64748b; cursor: pointer; text-transform: uppercase; width: auto; flex: none;" title="Reset to default Render URL">Reset</button>
-      </div>
-      <div style="display: flex; gap: 6px;">
-        <input type="text" id="serverUrlInput" placeholder="https://visual-pereption.onrender.com" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 3px; background: #fff;" />
-        <button id="saveServerBtn" style="width: auto; flex: none; font-size: 10px; padding: 5px 10px; background: #1a1a2e; color: #fff; border-radius: 3px; border: none; cursor: pointer;">Save</button>
-      </div>
-      <div id="serverUrlStatus" style="font-size: 9px; color: #64748b; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Active: https://visual-pereption.onrender.com</div>
-    </div>
+    .status-icon {
+      font-size: 22px;
+    }
 
-    <!-- Provider Mode Switcher & Status Badge -->
-    <div style="margin-bottom: 14px; padding: 8px 10px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; font-family: ui-monospace, monospace;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">VLM Provider Mode</span>
-        <select id="modeSelect" style="font-size: 11px; padding: 2px 6px; border: 1px solid #94a3b8; border-radius: 3px; background: #f8fafc; font-weight: 600; cursor: pointer;">
-          <option value="cloud">Cloud (Groq)</option>
-          <option value="offline">Offline (Local Ollama)</option>
-        </select>
-      </div>
-      <div id="modeStatusBadge" style="font-size: 10px; padding: 4px 8px; border-radius: 3px; font-weight: 700; display: flex; align-items: center; gap: 6px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
-        <span id="modeStatusDot" style="width: 7px; height: 7px; border-radius: 50%; background: #0284c7; display: inline-block;"></span>
-        <span id="modeStatusText">CLOUD MODE (Groq)</span>
+    .status-title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .status-detail {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.4;
+    }
+
+    .features-list {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 16px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 10px;
+    }
+    .feature-item:last-child { margin-bottom: 0; }
+
+    .btn-explain {
+      width: 100%;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+      margin-bottom: 12px;
+    }
+
+    .btn-explain:hover {
+      background: #1d4ed8;
+    }
+
+    .explain-box {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      color: #1e293b;
+      display: none;
+      border-left: 4px solid #2563eb;
+      margin-bottom: 12px;
+    }
+
+    .pilot-export {
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+    }
+
+    .btn-export-link {
+      font-size: 12px;
+      color: #64748b;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-export-link:hover { color: #0f172a; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🛡️</span>
+      <div class="brand-text">
+        <h1 id="app-title">Sakha (సఖ)</h1>
+        <p id="app-subtitle">Your Digital Safety Companion</p>
       </div>
     </div>
-
-    <div class="control-group">
-      <input type="text" id="taskInput" placeholder="CMD: e.g. fill out signup form">
-      <div class="btn-row">
-        <button id="analyzeBtn">Execute</button>
-        <button id="demoBtn">Demo Mode</button>
-      </div>
+    <div class="lang-toggle">
+      <select id="lang-selector">
+        <option value="en">English</option>
+        <option value="te">తెలుగు</option>
+        <option value="hi">हिन्दी</option>
+      </select>
     </div>
+  </header>
 
-    <div id="modelLoadWrap">
-      <div class="label">
-        <span id="modelLoadFile">Loading model dependency</span>
-        <span id="modelLoadPct">0%</span>
-      </div>
-      <progress id="modelLoadProgress" value="0" max="100"></progress>
+  <div id="status-card" class="status-card">
+    <div class="status-header">
+      <span id="status-icon" class="status-icon">✓</span>
+      <div id="status-title" class="status-title">Page Appears Safe</div>
     </div>
+    <div id="status-detail" class="status-detail">No scam or deceptive patterns detected on this site.</div>
+  </div>
 
-    <div id="statusText">System idle.</div>
-
-    <!-- ── Inline User Input Fallback Prompt (Requirement 4) ── -->
-    <div id="userInputPromptCard" style="display: none; margin-bottom: 12px; background: #fff; border: 2px solid #f59e0b; border-radius: 4px; padding: 12px; font-family: ui-monospace, monospace;">
-      <div id="promptCardTitle" style="font-size: 11px; font-weight: 700; color: #92400e; margin-bottom: 8px;">
-        No value found for FIELD — enter one now?
-      </div>
-      <input type="text" id="promptCardInput" placeholder="Enter value..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 3px; font-size: 12px; margin-bottom: 8px;" />
-      <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #475569; margin-bottom: 10px;">
-        <input type="checkbox" id="promptCardSaveDefault" checked style="cursor: pointer;" />
-        <label for="promptCardSaveDefault" id="promptCardSaveLabel" style="cursor: pointer;">Save this as your default for future forms?</label>
-      </div>
-      <div style="display: flex; gap: 8px;">
-        <button id="promptCardSubmitBtn" style="background: #1a1a2e; color: #fff; font-size: 11px; padding: 6px 12px; border-radius: 3px;">Submit & Continue</button>
-        <button id="promptCardSkipBtn" style="background: #fff; color: #64748b; border: 1px solid #cbd5e1; font-size: 11px; padding: 6px 12px; border-radius: 3px;">Skip Step</button>
-      </div>
+  <div class="features-list">
+    <div class="feature-item">
+      <span>🔒</span>
+      <span>Aadhaar, PAN & Cards Blurred On-Screen</span>
     </div>
-
-    <!-- ── Data Reduction Metrics Panel ── -->
-    <div id="metricsPanel">
-      <div class="panel-header">▸ Data Reduction Metrics</div>
-      <div class="metrics-grid">
-        <div class="metric-cell">
-          <div class="metric-label">Raw Screenshot</div>
-          <div class="metric-value" id="metric-raw">—</div>
-        </div>
-        <div class="metric-cell">
-          <div class="metric-label">Sent Payload</div>
-          <div class="metric-value" id="metric-sent">—</div>
-        </div>
-        <div class="metric-cell">
-          <div class="metric-label">Byte Δ</div>
-          <div class="metric-value" id="metric-reduction">—</div>
-        </div>
-        <div class="metric-cell">
-          <div class="metric-label">PII Surface</div>
-          <div class="metric-value" id="metric-surface">—</div>
-        </div>
-      </div>
-      <div class="metric-note" id="metric-note"></div>
+    <div class="feature-item">
+      <span>🚫</span>
+      <span>Scam & Typosquatting Warning Active</span>
     </div>
-
-    <!-- ── Redaction Leak Verification Panel ── -->
-    <div id="leakPanel">
-      <div class="panel-header">▸ Redaction Leak Verification</div>
-      <div class="leak-body">
-        <div class="leak-dot"></div>
-        <span id="leakPanelText">Awaiting redaction…</span>
-      </div>
+    <div class="feature-item">
+      <span>📲</span>
+      <span>Zero Personal Data Leaves Device</span>
     </div>
+  </div>
 
-    <div id="canvasWrap">
-      <canvas id="debugCanvas"></canvas>
-    </div>
+  <button id="btn-explain" class="btn-explain">
+    <span>💡</span>
+    <span id="explain-btn-text">What is this page asking me?</span>
+  </button>
 
-    <div id="piiTable"></div>
+  <div id="explain-output" class="explain-box"></div>
 
-    <div id="legend" style="flex-wrap: wrap; gap: 6px 10px;">
-      <div class="legend-item"><div class="swatch region"></div><span>OD</span></div>
-      <div class="legend-item"><div class="swatch text"></div><span>OCR</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#ef4444"></div><span>PASS</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#f97316"></div><span>EMAIL</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#ea580c"></div><span>AADHAAR</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#10b981"></div><span>PAN</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#6366f1"></div><span>GSTIN</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#0ea5e9"></div><span>IFSC</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#ca8a04"></div><span>MOBILE</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#ec4899"></div><span>CARD</span></div>
-      <div class="legend-item"><div class="swatch" style="background:#06b6d4"></div><span>FACE</span></div>
-    </div>
+  <div class="pilot-export">
+    <button id="btn-export-logs" class="btn-export-link">Download Pilot Telemetry (Zero PII CSV)</button>
+  </div>
 
-    <script type="module" src="popup.js"></script>
-  </body>
+  <script type="module" src="popup.js"></script>
+</body>
 </html>

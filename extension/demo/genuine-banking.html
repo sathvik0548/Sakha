@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NetBanking Login — hdfcbank.com</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; color: #222; }
+    header {
+      background: #003d7a; color: white; padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .bank-logo { font-size: 22px; font-weight: bold; letter-spacing: 1px; color: #fff; }
+    .bank-tagline { font-size: 11px; color: #93c5fd; }
+    nav { display: flex; gap: 20px; font-size: 13px; }
+    nav a { color: #93c5fd; text-decoration: none; }
+    .ssl-badge { background: #16a34a; color: white; font-size: 11px; padding: 4px 10px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
+    .main { display: flex; justify-content: center; align-items: flex-start; gap: 32px; padding: 40px 24px; }
+    .login-card {
+      background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      padding: 32px; width: 360px;
+    }
+    .login-card h2 { font-size: 18px; color: #003d7a; margin-bottom: 6px; }
+    .login-card p { font-size: 12px; color: #666; margin-bottom: 24px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 4px; margin-top: 14px; }
+    input {
+      width: 100%; padding: 10px 12px; border: 1px solid #d1d5db;
+      border-radius: 4px; font-size: 14px;
+    }
+    input:focus { border-color: #003d7a; outline: none; }
+    .login-btn {
+      display: block; width: 100%; margin-top: 24px; padding: 12px;
+      background: #003d7a; color: white; font-size: 15px; font-weight: bold;
+      border: none; border-radius: 4px; cursor: pointer;
+    }
+    .login-btn:hover { background: #00245a; }
+    .links { display: flex; justify-content: space-between; margin-top: 14px; font-size: 12px; }
+    .links a { color: #003d7a; text-decoration: none; }
+    .info-panel { width: 300px; }
+    .info-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); margin-bottom: 16px; font-size: 13px; }
+    .info-card h3 { color: #003d7a; margin-bottom: 8px; font-size: 14px; }
+    .info-card p { color: #555; line-height: 1.5; }
+    .notice { background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #92400e; margin-top: 8px; }
+    footer { background: #1e3a5f; color: #93c5fd; text-align: center; font-size: 11px; padding: 16px; }
+  </style>
+</head>
+<body>
+  <!-- SAKHA DEMO: SCENARIO 4 — Genuine-looking banking page (genuine domain hdfcbank.com) -->
+  <header>
+    <div class="header-left">
+      <div>
+        <div class="bank-logo">HDFC Bank</div>
+        <div class="bank-tagline">We understand your world</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#">Personal</a>
+      <a href="#">Business</a>
+      <a href="#">Cards</a>
+      <a href="#">Loans</a>
+    </nav>
+    <div class="ssl-badge">🔒 Secure | hdfcbank.com</div>
+  </header>
+
+  <div class="main">
+    <div class="login-card">
+      <h2>NetBanking Login</h2>
+      <p>Enter your Customer ID and Password to access your account securely.</p>
+
+      <label for="nb-cid">Customer ID</label>
+      <input type="text" id="nb-cid" placeholder="Enter Customer ID" autocomplete="username" />
+
+      <label for="nb-pass">Password</label>
+      <input type="password" id="nb-pass" placeholder="Enter Password" autocomplete="current-password" />
+
+      <div class="notice">
+        🛡️ HDFC Bank will <strong>never</strong> ask for your full Aadhaar, PAN, CVV, or UPI PIN to log in.
+      </div>
+
+      <button class="login-btn" id="nb-login-btn">Login Securely</button>
+      <div class="links">
+        <a href="#">Forgot Customer ID?</a>
+        <a href="#">Forgot Password?</a>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-card">
+        <h3>🔐 Security Reminder</h3>
+        <p>Do not share your password, OTP, or UPI PIN with anyone — including HDFC Bank representatives.</p>
+      </div>
+      <div class="info-card">
+        <h3>📱 Alternate Access</h3>
+        <p>Use the official HDFC Bank mobile app available on the Play Store and App Store.</p>
+      </div>
+      <div class="info-card">
+        <h3>📞 Helpline</h3>
+        <p>1800-202-6161 (Toll-Free) · 24 × 7 · Available in English, Hindi, and regional languages.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 HDFC Bank Ltd. All Rights Reserved. | Registered Office: HDFC Bank House, Senapati Bapat Marg, Lower Parel, Mumbai 400 013. | CIN: L65920MH1994PLC080618
+  </footer>
+</body>
+</html>

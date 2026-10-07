@@ -1,128 +1,96 @@
-# On-Device Visual Perception for Light-Weight Browser Agents
+# Sakha (సఖ) — On-Device Digital Safety Companion
 
-> **Smart India Hackathon (SIH26171)** — Privacy-Preserving Autonomous Browser Agent with Precision Client-Side PII Redaction.
-
-A lightweight Chrome extension and reasoning engine that enables autonomous web task execution without sacrificing user privacy. Built to solve SIH26171, this system guarantees that all visual perception, facial biometric detection, and identity token redacting occur strictly on-device inside the browser sandbox before any network transmission: **only cryptographically verified, sanitized visual frames and non-sensitive structural topologies are ever transmitted to the reasoning server.**
-
----
-
-## Live Server
-
-The reasoning backend is deployed live at:
-**[https://visual-pereption.onrender.com](https://visual-pereption.onrender.com)**
-
-> [!NOTE]
-> This live Render backend is already configured as the extension's default server URL in `chrome.storage.local`. **Zero backend installation or server configuration is required to test and evaluate the extension.**
-
-- **Health check endpoint**: [https://visual-pereption.onrender.com/health](https://visual-pereption.onrender.com/health)
-- **Hosted interactive demo page**: [https://visual-pereption.onrender.com/demo/vendor-registration.html](https://visual-pereption.onrender.com/demo/vendor-registration.html)
+> **Seva First Innovation Challenge (SFIC) — Theme: Secure Bharat**  
+> An on-device Chrome extension engineered specifically for senior citizens in India. It masks sensitive credentials on-screen, alerts against scams and intimidation tactics with zero jargon in English and Telugu, and never transmits personal data off the device.
 
 ---
 
-## Install the Extension
+## Key Features
 
-Follow these steps to install the unpacked extension in Google Chrome in under two minutes:
+1. **Deterministic Scam & Typosquatting Defense (100% On-Device)**
+   - **Lookalike & Homoglyph Engine:** Detects Cyrillic character substitutions, Punycode tricks (`xn--`), subdomain spoofing (e.g., `sbi.co.in.fake-portal.com`), and low Levenshtein edit distance typosquatting against the official Indian banking & government allowlist.
+   - **UPI PIN Traps:** Identifies deceptive *"Enter PIN to receive money / claim cashback"* patterns.
+   - **Intimidation & Urgency Language:** Scans for pressure tactics (*"Electricity disconnected tonight"*, *"Account blocked within 24 hours"*, *"SIM deactivation"*) in English, romanized Hindi, and romanized Telugu.
+   - **Malicious App Prompts:** Detects forced downloads of Android `.apk` files or remote control software (AnyDesk, QuickSupport).
+   - **Senior Citizen Modal Alert:** Acknowledgment-required high-contrast screen with clear options to exit safely.
 
-1. **Clone or download this repository** to your local machine:
-   ```bash
-   git clone https://github.com/sathvik0548/Visual-Pereption.git
-   ```
-2. **Open Chrome** and navigate to `chrome://extensions` in the address bar.
-3. **Enable "Developer mode"** using the toggle switch located in the top-right corner.
-4. **Click "Load unpacked"** in the top-left toolbar.
-5. **Select the `extension/` folder** from the root of this cloned repository (the directory containing `manifest.json`).
-6. **The extension icon should now appear in the toolbar** (click the puzzle-piece extensions icon and pin **Browser Agent** for quick access).
+2. **Universal On-Page Sensitive Data Masking**
+   - Automatically detects and blurs:
+     - **Aadhaar Numbers** (12-digit, validated with Verhoeff checksum algorithm)
+     - **PAN Numbers** (10-character structural regex `[A-Z]{5}[0-9]{4}[A-Z]`)
+     - **Debit / Credit Card Numbers** (13–19 digits, Luhn validated)
+     - **Bank IFSC Codes** (`[A-Z]{4}0[A-Z0-9]{6}`)
+     - **UPI IDs** (`user@bank`)
+     - **Phone Numbers** (Indian mobile formats)
+   - **Tap-to-Reveal:** Smooth click-to-unblur interaction. Form values remain intact for native submissions.
 
----
+3. **Plain-Language "Explain" Assistant**
+   - Seniors can click *"What is this page asking me?"* / *"ఈ పేజీ నన్ను ఏమి అడుగుతోంది?"* to receive a gentle 2-sentence summary.
+   - **Privacy Boundary:** Text sent to the summary assistant is **strictly pre-masked**. No unredacted PII ever leaves the browser.
 
-## Try It
-
-Experience the end-to-end privacy redaction and autonomous execution pipeline on our realistic procurement testbed:
-
-1. **Open the Demo Page**:
-   Navigate to the hosted vendor portal:
-   👉 **[https://visual-pereption.onrender.com/demo/vendor-registration.html](https://visual-pereption.onrender.com/demo/vendor-registration.html)**
-   *(Alternatively, if running locally, open [server/demo/vendor-registration.html](server/demo/vendor-registration.html) in Chrome).*
-
-2. **Open the Extension**:
-   Click the **Browser Agent** extension icon in your Chrome toolbar. The popup panel will open.
-
-3. **Provide Task Instruction**:
-   Type the following instruction into the prompt input (or click **"Demo Mode"** / **"Analyze Screen"**):
-   ```text
-   Fill out the vendor registration form with valid test credentials and submit
-   ```
-
-4. **What to Expect**:
-   - **Pipeline Stages Lighting Up**: Watch the stage progress indicators transition in real time: `DOM SCAN` ➔ `LOCAL INFERENCE` (Florence-2 / BlazeFace) ➔ `REDACT CANVAS` ➔ `AGENT REASONING` ➔ `EXECUTION`.
-   - **Redaction Panel**: In the visual preview, all high-sensitivity PII fields (Aadhaar numbers, PAN, GSTIN, bank IFSC codes, telephone numbers, and profile photos/faces) are physically masked with opaque black bounding boxes on an offscreen HTML5 canvas.
-   - **Leak Verification Result**: A zero-leak audit badge confirms that raw PII never left the client sandbox. The cloud VLM receives only sanitized visual frames accompanied by an abstract `AgentRequestV1` Redaction Manifest.
-   - **Autonomous Action Highlights**: The agent steps through form elements, highlighting interacted fields in green and safely substituting localized credentials from client-side memory.
+4. **Field Pilot Tooling & Zero-PII Telemetry**
+   - First-run plain-language onboarding consent modal.
+   - Local-only pilot interaction logger exportable to clean CSV/JSON for field researchers.
 
 ---
 
-## Architecture
+## Empirical Benchmark & Evaluation Results
 
-The system enforces a zero-trust, edge-native privacy architecture spanning on-device browser components and a swappable reasoning server:
+Tested against 60 synthetic pages (30 scam, 30 genuine) divided into 70% Tuning and 30% Hold-out partitions:
 
-```
-[ Active Webpage ]
-       │
-       ▼  (1) Capture visible tab + scan live DOM attributes
-[ Chrome MV3 Extension ]
-       │
-       ▼  (2) Offscreen document sandbox (WebGPU / WASM)
-[ Florence-2 OCR + BlazeFace Face Detector + RegEx Structural Validators ]
-       │
-       ▼  (3) Physical black-box canvas masking & manifest generation
-[ Sanitized AgentRequestV1 Frame + Redaction Manifest ]
-       │  (Only sanitized data leaves device; raw PII never transmitted)
-       ▼
-[ Cloud / Deployed Reasoning Server (POST /analyze) ]
-       │
-       ▼  (4) Multi-modal planning over non-sensitive structural topology
-[ Multi-Step Action Execution Plan ]
-       │
-       ▼  (5) Local client dispatch
-[ Content Script DOM Dispatcher with Isolated Credential Injection ]
+| Metric | Tuning Set (42 pages) | Hold-Out Set (18 pages) | Target / Budget |
+|---|---|---|---|
+| **Scam Detection Rate (Recall)** | **100.00%** (21/21) | **100.00%** (9/9) | > 95% |
+| **False-Alarm Rate** | **0.00%** (0/21) | **0.00%** (0/9) | < 5% |
+| **Scam Engine Latency** | **0.150 ms** / page | **0.068 ms** / page | < 10 ms |
+| **DOM Masking Traversal** | **13.03 ms** / heavy page | **13.03 ms** / heavy page | < 50 ms |
+
+*Full results logged in `evaluation/evaluation_report.json`.*
+
+---
+
+## Installation & Running Locally
+
+### 1. Load Extension in Chrome
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Enable **Developer mode** (top-right toggle).
+3. Click **Load unpacked** and select the directory:  
+   `/Users/sathvikbadam/Desktop/Sakha/sakha-sfic/extension`
+4. The extension **Sakha (సఖ)** will appear in your toolbar.
+
+### 2. Run Test Suites & Evaluation
+```bash
+cd sakha-sfic
+
+# Run Scam Engine Unit Tests
+node extension/test_scamDetector.js
+
+# Run Sensitive Masking Engine Tests
+node extension/test_maskEngine.js
+
+# Run Privacy Event Logger Tests
+node extension/test_eventLogger.js
+
+# Run Low-End Hardware Performance Check
+node extension/benchmark_masking_perf.js
+
+# Run Complete Synthetic Benchmark (Tuning & Hold-out sets)
+node evaluation/evaluate_scam_detection.js
 ```
 
-### Key Pipeline Stages
-- **Capture**: Captures the active viewport screenshot alongside deterministic DOM layout geometry.
-- **Local Detection**: Runs Florence-2 OCR, WebGPU/WASM acceleration, and BlazeFace biometric facial recognition directly within an isolated offscreen document.
-- **Redaction**: Physically draws opaque redaction blocks over all detected PII (Aadhaar, PAN, GSTIN, IFSC, mobile, credit cards, emails, passwords, and faces) on an offscreen canvas.
-- **Verification**: Asserts a zero-leak verification check across the outgoing payload to guarantee no unmasked PII substrings escape the local client.
-- **Server Reasoning**: Transmits the sanitized frame and structural manifest (`AgentRequestV1`) to the reasoning server (Groq/Gemini/Ollama) to synthesize an action trajectory.
-- **Execution**: The content script executes DOM mutations (typing, clicking, selecting) step-by-step with real-time visual highlights while drawing credentials exclusively from local browser memory.
-
-For an in-depth breakdown of algorithmic design, schema specifications, and security threat models, read the [Technical Solution Whitepaper](solution.md) and review the [Technical Evaluation Report](docs/SIH26171_Technical_Evaluation_Report.pdf).
+### 3. Optional Local Explain Backend
+```bash
+cd sakha-sfic/server
+npm install
+node server.js
+```
 
 ---
 
-## Running the Server Locally *(Optional, for Development Only)*
-
-Running a local server is **optional** and only required if you plan to modify backend prompt logic, implement new VLM providers, or work entirely offline with local LLMs (e.g. Ollama):
-
-1. **Navigate to the server directory and install dependencies**:
-   ```bash
-   cd server
-   npm install
-   ```
-
-2. **Configure environment variables (optional)**:
-   Create a `server/.env` file with your preferred API keys:
-   ```env
-   PORT=3000
-   GROQ_API_KEY=your_groq_api_key_here
-   VLM_MODE=cloud
-   ```
-
-3. **Start the local server**:
-   ```bash
-   npm start
-   # or for automatic reloading:
-   npm run dev
-   ```
-
-4. **Point the extension to localhost**:
-   In the extension popup under **Server Settings**, change the URL to `http://localhost:3000` (or leave blank to automatically reset to the live Render backend).
+## Repository Documentation Index
+- [`PRIVACY.md`](./PRIVACY.md) — Rigorous on-device privacy guarantee and zero-data-leak architecture.
+- [`LIMITATIONS.md`](./LIMITATIONS.md) — Operational constraints, unsupported scopes, and edge cases.
+- [`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md) — 2.5-minute live presentation walkthrough.
+- [`PILOT_QUESTIONNAIRE.md`](./PILOT_QUESTIONNAIRE.md) — Printable 1-5 Likert survey for senior pilot participants.
+- [`ALLOWLIST_TO_VERIFY`](./ALLOWLIST_TO_VERIFY) — Official Indian financial, payment, and identity domains (*Status: VERIFY BY HUMAN*).
+- [`STRINGS_TO_REVIEW.md`](./STRINGS_TO_REVIEW.md) — Non-English Telugu and Hindi localization strings cataloged for native-speaker audit.

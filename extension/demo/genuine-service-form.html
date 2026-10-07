@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PM Senior Citizen Pension Registration — pmsr.gov.in</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f5f7fa; color: #222; }
+    header {
+      background: #f4620f; color: white; padding: 14px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    header img { width: 44px; height: 44px; border-radius: 4px; background: white; }
+    header .title { font-size: 18px; font-weight: bold; }
+    header .subtitle { font-size: 12px; color: #ffe0cc; }
+    .nav-bar { background: #1a237e; padding: 8px 24px; }
+    .nav-bar span { color: #90caf9; font-size: 13px; }
+    .breadcrumb { padding: 12px 24px; font-size: 12px; color: #666; }
+    .container { max-width: 700px; margin: 16px auto; background: white; border-radius: 6px; box-shadow: 0 1px 6px rgba(0,0,0,0.1); padding: 32px; }
+    h2 { font-size: 20px; color: #1a237e; margin-bottom: 6px; }
+    .form-notice {
+      background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 4px;
+      padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #2e7d32;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+    .full-width { grid-column: 1 / -1; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid #bdbdbd;
+      border-radius: 4px; font-size: 13px; color: #222;
+    }
+    input:focus, select:focus { border-color: #1a237e; outline: none; }
+    textarea { height: 70px; resize: vertical; }
+    .section-head { grid-column: 1 / -1; font-size: 15px; font-weight: bold; color: #1a237e; border-bottom: 2px solid #e0e0e0; padding-bottom: 6px; margin-top: 8px; }
+    .submit-row { grid-column: 1 / -1; display: flex; gap: 12px; margin-top: 8px; }
+    .btn-submit {
+      padding: 12px 32px; background: #1a237e; color: white; font-size: 14px;
+      font-weight: bold; border: none; border-radius: 4px; cursor: pointer;
+    }
+    .btn-reset {
+      padding: 12px 24px; background: white; color: #555; font-size: 14px;
+      border: 1px solid #bdbdbd; border-radius: 4px; cursor: pointer;
+    }
+    .footer-strip {
+      background: #37474f; color: #cfd8dc; text-align: center;
+      font-size: 11px; padding: 14px; margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <!-- SAKHA DEMO: SCENARIO 3 — Genuine-looking government service form (NOT a scam) -->
+  <header>
+    <div>
+      <div class="title">Government of India · Ministry of Social Justice</div>
+      <div class="subtitle">PM Senior Citizen Pension Registration Portal</div>
+    </div>
+  </header>
+  <div class="nav-bar">
+    <span>Home › Services › Pension Registration</span>
+  </div>
+  <div class="breadcrumb">pmsr.gov.in › Apply Online › New Registration</div>
+  <div class="container">
+    <h2>PM Senior Citizen Pension — Online Registration Form</h2>
+    <div class="form-notice">
+      ✅ This portal is for informational registration only. No payment, UPI PIN, CVV or full card details are required at any step.
+    </div>
+    <form class="form-grid" id="pension-form">
+      <div class="section-head">Personal Details</div>
+      <div>
+        <label for="pen-fname">First Name *</label>
+        <input type="text" id="pen-fname" placeholder="Suresh" required />
+      </div>
+      <div>
+        <label for="pen-lname">Last Name *</label>
+        <input type="text" id="pen-lname" placeholder="Rao" required />
+      </div>
+      <div>
+        <label for="pen-dob">Date of Birth *</label>
+        <input type="date" id="pen-dob" required />
+      </div>
+      <div>
+        <label for="pen-gender">Gender *</label>
+        <select id="pen-gender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="section-head">Address</div>
+      <div class="full-width">
+        <label for="pen-addr">Full Address *</label>
+        <textarea id="pen-addr" placeholder="House No., Street, Village/Town"></textarea>
+      </div>
+      <div>
+        <label for="pen-state">State *</label>
+        <select id="pen-state">
+          <option value="">Select State</option>
+          <option>Andhra Pradesh</option>
+          <option>Telangana</option>
+          <option>Karnataka</option>
+          <option>Maharashtra</option>
+          <option>Tamil Nadu</option>
+        </select>
+      </div>
+      <div>
+        <label for="pen-pincode">Pincode *</label>
+        <input type="text" id="pen-pincode" placeholder="500001" maxlength="6" />
+      </div>
+
+      <div class="section-head">Identity Verification (Last 4 digits only)</div>
+      <div>
+        <label for="pen-aadhaar-last4">Last 4 Digits of Aadhaar *</label>
+        <input type="text" id="pen-aadhaar-last4" placeholder="XXXX" maxlength="4" />
+      </div>
+      <div>
+        <label for="pen-mobile">Mobile Number *</label>
+        <input type="tel" id="pen-mobile" placeholder="9876543210" maxlength="10" />
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-submit" id="pension-submit-btn">Submit Registration</button>
+        <button type="reset" class="btn-reset">Clear Form</button>
+      </div>
+    </form>
+  </div>
+  <div class="footer-strip">
+    pmsr.gov.in · Ministry of Social Justice &amp; Empowerment · Government of India · This portal does not collect payment details.
+  </div>
+</body>
+</html>

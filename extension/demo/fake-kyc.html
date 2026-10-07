@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KYC Verification — sbi.co.in-kyc-portal.top</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; color: #222; }
+    header {
+      background: #1a3a6e; color: white; padding: 12px 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    header .logo { font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+    header .tagline { font-size: 12px; color: #aac8ff; }
+    .alert-bar {
+      background: #d32f2f; color: white;
+      padding: 10px 24px; font-size: 14px; font-weight: bold;
+      text-align: center; letter-spacing: 0.3px;
+    }
+    .container { max-width: 560px; margin: 32px auto; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); padding: 32px; }
+    h2 { font-size: 20px; margin-bottom: 6px; color: #1a3a6e; }
+    p.subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; margin-top: 16px; }
+    input, select {
+      width: 100%; padding: 10px 12px; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 14px; color: #222;
+    }
+    input:focus, select:focus { outline: none; border-color: #1a3a6e; }
+    .submit-btn {
+      display: block; width: 100%; margin-top: 28px; padding: 14px;
+      background: #1a3a6e; color: white; font-size: 16px; font-weight: bold;
+      border: none; border-radius: 6px; cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+    .submit-btn:hover { background: #122b52; }
+    .footer { text-align: center; font-size: 11px; color: #999; margin-top: 20px; }
+    .otp-box { background: #fff3cd; border: 1px solid #f0ad4e; border-radius: 6px; padding: 12px 16px; margin-top: 16px; font-size: 13px; }
+    .otp-box strong { color: #d97706; }
+  </style>
+</head>
+<body>
+  <!-- SAKHA DEMO: SCENARIO 1 — Fake KYC page (scam) -->
+  <!-- Domain mimics SBI but is a phishing site: sbi.co.in-kyc-portal.top -->
+  <header>
+    <div>
+      <div class="logo">🏦 State Bank of India</div>
+      <div class="tagline">The Banker to Every Indian</div>
+    </div>
+  </header>
+  <div class="alert-bar">
+    ⚠️ ACTION REQUIRED: Your account will be BLOCKED in 24 hours if KYC is not updated immediately!
+  </div>
+  <div class="container">
+    <h2>Urgent KYC Verification</h2>
+    <p class="subtitle">Enter your details to verify and prevent account suspension.</p>
+
+    <label for="kyc-name">Full Name (as per Aadhaar)</label>
+    <input type="text" id="kyc-name" placeholder="Rajesh Kumar" />
+
+    <label for="kyc-aadhaar">Aadhaar Number</label>
+    <input type="text" id="kyc-aadhaar" placeholder="5489 1234 5674" maxlength="14" />
+
+    <label for="kyc-pan">PAN Number</label>
+    <input type="text" id="kyc-pan" placeholder="ABCDE1234F" maxlength="10" />
+
+    <label for="kyc-dob">Date of Birth</label>
+    <input type="date" id="kyc-dob" />
+
+    <label for="kyc-card">Debit Card Number</label>
+    <input type="text" id="kyc-card" placeholder="4532 1234 5678 9014" maxlength="19" />
+
+    <label for="kyc-cvv">CVV</label>
+    <input type="text" id="kyc-cvv" placeholder="123" maxlength="3" />
+
+    <div class="otp-box">
+      <strong>⚠️ Enter your UPI PIN to confirm identity and receive your ₹50 KYC bonus!</strong><br/>
+      <small>Your PIN is required only for verification — no money will be deducted.</small>
+    </div>
+
+    <label for="kyc-upi-pin">UPI PIN</label>
+    <input type="password" id="kyc-upi-pin" placeholder="Enter 4 or 6 digit UPI PIN" maxlength="6" />
+
+    <label for="kyc-mobile">Registered Mobile Number</label>
+    <input type="tel" id="kyc-mobile" placeholder="9876543210" maxlength="10" />
+
+    <button class="submit-btn" id="kyc-submit-btn">Submit KYC Now</button>
+    <div class="footer">sbi.co.in-kyc-portal.top · Secured by SSL</div>
+  </div>
+</body>
+</html>

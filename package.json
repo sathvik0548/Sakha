@@ -1,0 +1,17 @@
+{
+  "name": "sakha-sfic",
+  "version": "1.1.0",
+  "description": "Sakha — On-Device Digital Safety Companion for Senior Citizens (SFIC Secure Bharat)",
+  "private": true,
+  "scripts": {
+    "test:demo": "npx playwright test demo_walkthrough.test.js",
+    "test:unit": "node extension/test_scamDetector.js && node extension/test_maskEngine.js && node extension/test_eventLogger.js",
+    "test:privacy": "node extension/test_privacy_leak.js",
+    "test:all": "npm run test:unit && npm run test:privacy && npm run test:demo",
+    "evaluate": "node evaluation/evaluate_scam_detection.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "playwright": "^1.63.0"
+  }
+}

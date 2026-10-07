@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Privacy-Preserving Browser Agent",
-  "version": "0.2.0",
-  "description": "Local visual perception via Florence-2 (WebGPU/WASM). Captures screen, detects UI regions and text with bounding boxes.",
+  "name": "Sakha (సఖ) — On-Device Senior Safety Companion",
+  "version": "1.1.0",
+  "description": "On-device digital safety companion for senior citizens in India. Blurs sensitive details on screen and alerts against scams.",
 
   "permissions": [
     "activeTab",
@@ -17,18 +17,8 @@
   },
 
   "host_permissions": [
-    "https://visual-pereption.onrender.com/*",
     "http://localhost:3000/*",
-    "http://127.0.0.1:3000/*",
-    "http://localhost:11434/*",
-    "http://127.0.0.1:11434/*",
-    "https://huggingface.co/*",
-    "https://*.huggingface.co/*",
-    "https://cdn-lfs.huggingface.co/*",
-    "https://cdn-lfs-us-1.huggingface.co/*",
-    "https://cdn-lfs-eu-1.huggingface.co/*",
-    "https://storage.googleapis.com/*",
-    "https://tfhub.dev/*"
+    "http://127.0.0.1:3000/*"
   ],
 
   "background": {
@@ -39,17 +29,31 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "css": ["sakha.css"],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
   ],
 
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "demo/fake-kyc.html",
+        "demo/upi-collect-trap.html",
+        "demo/genuine-service-form.html",
+        "demo/genuine-banking.html"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Browser Agent"
+    "default_title": "Sakha (సఖ)"
   },
 
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   }
 }
+

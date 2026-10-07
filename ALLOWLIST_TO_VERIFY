@@ -1,0 +1,40 @@
+# ALLOWLIST_TO_VERIFY
+# Status: VERIFY BY HUMAN
+#
+# List of official Indian banking, payments (UPI), and government portals.
+# Used by Sakha's lookalike domain engine to detect deceptive spoofing and typosquatting.
+# NOTE: All entries below are placeholders until verified and confirmed by human supervisor.
+
+[BANKING]
+sbi.co.in
+onlinesbi.sbi
+hdfcbank.com
+icicibank.com
+axisbank.com
+punjabnationalbank.in
+bankofbaroda.in
+canarabank.com
+kotak.com
+indusind.com
+unionbankofindia.co.in
+
+[PAYMENTS_AND_UPI]
+npci.org.in
+bhimupi.org.in
+paytm.com
+phonepe.com
+google.com/pay
+
+[GOVERNMENT_AND_IDENTITY]
+uidai.gov.in
+myaadhaar.uidai.gov.in
+incometax.gov.in
+epfindia.gov.in
+passportindia.gov.in
+parivahan.gov.in
+digilocker.gov.in
+india.gov.in
+ceir.gov.in
+cybercrime.gov.in
+sancharsaathi.gov.in
+pmkisan.gov.in

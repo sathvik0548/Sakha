@@ -1,0 +1,24 @@
+{
+  "tuning": {
+    "setName": "TUNING SET (70%)",
+    "total": 42,
+    "scams": 21,
+    "genuine": 21,
+    "detectionRate": 100,
+    "falseAlarmRate": 0,
+    "avgLatencyMs": 0.14964580952380976,
+    "misses": [],
+    "falseAlarms": []
+  },
+  "holdout": {
+    "setName": "HOLD-OUT SET (30%)",
+    "total": 18,
+    "scams": 9,
+    "genuine": 9,
+    "detectionRate": 100,
+    "falseAlarmRate": 0,
+    "avgLatencyMs": 0.06750244444444478,
+    "misses": [],
+    "falseAlarms": []
+  }
+}

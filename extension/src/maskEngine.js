@@ -1,0 +1,283 @@
+/**
+ * maskEngine.js — On-Page Real-Time Sensitive Data Masking Engine for Sakha
+ *
+ * Runs locally on any webpage (zero server transmission).
+ * Scans text nodes, input fields, and tables to mask:
+ * - Aadhaar (Verhoeff-validated 12-digit numbers)
+ * - PAN (10-char uppercase structural match [A-Z]{5}[0-9]{4}[A-Z])
+ * - Credit/Debit Card Numbers (13-19 digits, Luhn validated)
+ * - IFSC Codes ([A-Z]{4}0[A-Z0-9]{6})
+ * - Phone numbers (Indian mobile numbers 6-9xxxxxxxx)
+ * - UPI IDs (user@bank format)
+ *
+ * Tap-to-reveal overlay: CSS blur overlay that reveals on click.
+ * Strictly preserves native form submission value (never clears or alters input.value).
+ */
+
+import { verhoeffCheck, validatePAN, validateIFSC, validateIndianMobile } from "./pii.js";
+import { t } from "./i18n.js";
+
+// Accurate Luhn check matching pii.js
+function luhnCheck(raw) {
+  const digits = raw.replace(/\D/g, "").split("").reverse().map(Number);
+  if (digits.length < 13 || digits.length > 19) return false;
+  const sum = digits.reduce((acc, d, i) => {
+    if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+    return acc + d;
+  }, 0);
+  return sum % 10 === 0;
+}
+
+export function validateUPI(raw) {
+  if (typeof raw !== "string") return false;
+  return /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(raw.trim());
+}
+
+/**
+ * Scan raw string and identify all sensitive spans with their replacement mask
+ */
+export function identifySensitiveSpans(text) {
+  if (!text || typeof text !== "string") return [];
+  const spans = [];
+
+  // 1. Aadhaar (12 digits, optional spaces/hyphens)
+  const aadhaarRegex = /\b([2-9]\d{3}[\s\-]?\d{4}[\s\-]?\d{4})\b/g;
+  let m;
+  while ((m = aadhaarRegex.exec(text)) !== null) {
+    const raw = m[1];
+    const clean = raw.replace(/[\s\-]/g, "");
+    if (clean.length === 12 && verhoeffCheck(clean)) {
+      spans.push({
+        type: "AADHAAR",
+        raw,
+        masked: "XXXX XXXX " + clean.slice(8),
+        start: m.index,
+        end: m.index + raw.length
+      });
+    }
+  }
+
+  // 2. Card numbers (13-19 digits, Luhn validated)
+  const cardRegex = /\b(\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{1,7})\b/g;
+  while ((m = cardRegex.exec(text)) !== null) {
+    const raw = m[1];
+    const clean = raw.replace(/[\s\-]/g, "");
+    if (luhnCheck(clean)) {
+      // avoid re-masking an already matched Aadhaar
+      const overlaps = spans.some(s => s.start <= m.index && s.end >= m.index + raw.length);
+      if (!overlaps) {
+        spans.push({
+          type: "CARD",
+          raw,
+          masked: "•••• •••• •••• " + clean.slice(-4),
+          start: m.index,
+          end: m.index + raw.length
+        });
+      }
+    }
+  }
+
+  // 3. PAN (5 letters, 4 digits, 1 letter)
+  const panRegex = /\b([A-Z]{5}[0-9]{4}[A-Z])\b/gi;
+  while ((m = panRegex.exec(text)) !== null) {
+    const raw = m[1];
+    if (validatePAN(raw)) {
+      spans.push({
+        type: "PAN",
+        raw,
+        masked: raw.slice(0, 2) + "XXXXX" + raw.slice(-1),
+        start: m.index,
+        end: m.index + raw.length
+      });
+    }
+  }
+
+  // 4. IFSC ([A-Z]{4}0[A-Z0-9]{6})
+  const ifscRegex = /\b([A-Z]{4}0[A-Z0-9]{6})\b/gi;
+  while ((m = ifscRegex.exec(text)) !== null) {
+    const raw = m[1];
+    if (validateIFSC(raw)) {
+      spans.push({
+        type: "IFSC",
+        raw,
+        masked: raw.slice(0, 4) + "0••••••",
+        start: m.index,
+        end: m.index + raw.length
+      });
+    }
+  }
+
+  // 5. UPI ID
+  const upiRegex = /\b([a-zA-Z0-9.\-_]{2,64}@[a-zA-Z]{2,32})\b/g;
+  while ((m = upiRegex.exec(text)) !== null) {
+    const raw = m[1];
+    // Ignore standard email domains
+    if (!raw.endsWith("@gmail.com") && !raw.endsWith("@yahoo.com") && !raw.endsWith("@outlook.com") && !raw.endsWith("@hotmail.com")) {
+      const parts = raw.split("@");
+      const maskedUser = parts[0].length > 2 ? parts[0].slice(0, 2) + "•••" : "••";
+      spans.push({
+        type: "UPI_ID",
+        raw,
+        masked: `${maskedUser}@${parts[1]}`,
+        start: m.index,
+        end: m.index + raw.length
+      });
+    }
+  }
+
+  // Sort by starting index
+  return spans.sort((a, b) => a.start - b.start);
+}
+
+/**
+ * Mask text content, returning sanitized masked string
+ */
+export function maskSensitiveText(text) {
+  if (!text) return "";
+  const spans = identifySensitiveSpans(text);
+  if (spans.length === 0) return text;
+
+  let result = "";
+  let lastIdx = 0;
+  for (const span of spans) {
+    result += text.slice(lastIdx, span.start) + span.masked;
+    lastIdx = span.end;
+  }
+  result += text.slice(lastIdx);
+  return result;
+}
+
+/**
+ * Apply live DOM Masking Overlay on any webpage (Content script context)
+ */
+export function applyPageMasking(documentRoot = document, lang = "en") {
+  if (!documentRoot || !documentRoot.body) return { maskedInputs: 0, maskedTextNodes: 0 };
+
+  let maskedInputs = 0;
+  let maskedTextNodes = 0;
+
+  // 1. Mask Input Fields (Visual overlay only - DOES NOT MUTATE input.value)
+  const inputs = documentRoot.querySelectorAll("input:not([type='hidden']):not([type='submit']):not([type='button'])");
+  inputs.forEach((input) => {
+    if (input.getAttribute("data-sakha-monitored")) return;
+    input.setAttribute("data-sakha-monitored", "true");
+
+    const checkAndMaskInput = () => {
+      const val = input.value;
+      if (!val) return;
+      const spans = identifySensitiveSpans(val);
+      if (spans.length > 0) {
+        // Apply blur style directly to input when not focused
+        const activeEl = documentRoot.activeElement || (typeof document !== "undefined" ? document.activeElement : null);
+        if (activeEl !== input) {
+          input.classList.add("sakha-masked-input");
+          input.title = t("masked_badge", lang);
+        }
+        maskedInputs++;
+      } else {
+        input.classList.remove("sakha-masked-input");
+      }
+    };
+
+    input.addEventListener("focus", () => {
+      input.classList.remove("sakha-masked-input");
+    });
+    input.addEventListener("blur", () => {
+      checkAndMaskInput();
+    });
+    input.addEventListener("input", () => {
+      const activeEl = documentRoot.activeElement || (typeof document !== "undefined" ? document.activeElement : null);
+      if (activeEl !== input) checkAndMaskInput();
+    });
+
+    checkAndMaskInput();
+  });
+
+  // 2. Mask Static Text in DOM Elements (tables, paragraphs, spans)
+  const SHOW_TEXT = (typeof NodeFilter !== "undefined" && NodeFilter.SHOW_TEXT) ? NodeFilter.SHOW_TEXT : 4;
+  const FILTER_ACCEPT = (typeof NodeFilter !== "undefined" && NodeFilter.FILTER_ACCEPT) ? NodeFilter.FILTER_ACCEPT : 1;
+  const FILTER_REJECT = (typeof NodeFilter !== "undefined" && NodeFilter.FILTER_REJECT) ? NodeFilter.FILTER_REJECT : 2;
+
+  const walker = documentRoot.createTreeWalker(
+    documentRoot.body,
+    SHOW_TEXT,
+    {
+      acceptNode(node) {
+        if (!node.nodeValue || !node.nodeValue.trim()) return FILTER_REJECT;
+        const parentTag = node.parentElement?.tagName?.toLowerCase();
+        if (["script", "style", "noscript", "textarea", "input"].includes(parentTag)) {
+          return FILTER_REJECT;
+        }
+        if (node.parentElement?.classList?.contains("sakha-tap-mask")) {
+          return FILTER_REJECT;
+        }
+        return FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const textNodesToMask = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    const spans = identifySensitiveSpans(node.nodeValue);
+    if (spans.length > 0) {
+      textNodesToMask.push({ node, spans });
+    }
+  }
+
+  for (const item of textNodesToMask) {
+    const { node, spans } = item;
+    const parent = node.parentNode;
+    if (!parent) continue;
+
+    const fullText = node.nodeValue;
+    const frag = documentRoot.createDocumentFragment();
+    let cur = 0;
+
+    for (const span of spans) {
+      if (span.start > cur) {
+        frag.appendChild(documentRoot.createTextNode(fullText.slice(cur, span.start)));
+      }
+
+      // Create Tap-to-Reveal inline badge (Keyboard accessible)
+      const maskSpan = documentRoot.createElement("span");
+      maskSpan.className = "sakha-tap-mask sakha-blurred";
+      maskSpan.tabIndex = 0; // Accessible via keyboard Tab
+      maskSpan.textContent = span.raw;
+      maskSpan.setAttribute("data-raw-value", span.raw);
+      maskSpan.setAttribute("data-masked-value", span.masked);
+      maskSpan.setAttribute("role", "button");
+      maskSpan.setAttribute("aria-label", `${t("masked_badge", lang)} — ${t("tap_to_reveal", lang)}`);
+      maskSpan.setAttribute("title", `${t("masked_badge", lang)} — ${t("tap_to_reveal", lang)}`);
+
+      const toggleReveal = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        maskSpan.classList.toggle("sakha-blurred");
+        maskSpan.classList.toggle("sakha-revealed");
+      };
+
+      // Mouse tap
+      maskSpan.addEventListener("click", toggleReveal);
+
+      // Keyboard toggle (Enter or Space)
+      maskSpan.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          toggleReveal(e);
+        }
+      });
+
+      frag.appendChild(maskSpan);
+      cur = span.end;
+      maskedTextNodes++;
+    }
+
+    if (cur < fullText.length) {
+      frag.appendChild(documentRoot.createTextNode(fullText.slice(cur)));
+    }
+
+    parent.replaceChild(frag, node);
+  }
+
+  return { maskedInputs, maskedTextNodes };
+}

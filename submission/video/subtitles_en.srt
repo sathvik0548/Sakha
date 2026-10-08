@@ -1,0 +1,71 @@
+1
+00:00:00,500 --> 00:00:06,000
+For millions of senior citizens navigating digital India, a single deceptive link can lead to devastating loss.
+
+2
+00:00:06,500 --> 00:00:13,000
+Fear tactics, fake banking portals, and confusing payment traps prey on urgency and low digital literacy.
+
+3
+00:00:13,500 --> 00:00:19,500
+Meet Sakha — a calm, on-device digital safety companion designed specifically for elders.
+
+4
+00:00:20,000 --> 00:00:27,500
+Sakha runs completely inside the browser as a Manifest V3 extension, protecting pages without sending personal data away.
+
+5
+00:00:28,000 --> 00:00:33,000
+Watch what happens when an elder lands on a counterfeit verification page.
+
+6
+00:00:33,500 --> 00:00:41,500
+In just 0.068 milliseconds on our hold-out benchmark (RESULTS.md §1), Sakha detects the lookalike domain and credential combo.
+
+7
+00:00:42,000 --> 00:00:47,500
+Instead of panic, Sakha presents a calm, high-contrast, bilingual warning in English and Telugu.
+
+8
+00:00:48,000 --> 00:00:54,500
+It explains plainly what is wrong, and provides one large, accessible button to leave safely.
+
+9
+00:00:55,000 --> 00:01:03,500
+In benchmark testing across 60 scenarios, Sakha achieved a 100% scam detection rate with 0% false alarms (RESULTS.md §1).
+
+10
+00:01:04,000 --> 00:01:10,000
+Next, on genuine forms, Sakha safeguards privacy through automatic on-page blurring.
+
+11
+00:01:10,500 --> 00:01:17,500
+In just 13 milliseconds on heavy DOM trees (RESULTS.md §2), Aadhaar, PAN, and cards are masked from shoulder-surfers.
+
+12
+00:01:18,000 --> 00:01:24,500
+When needed, the senior can tap once to peek, verify their details, and tap to hide them again.
+
+13
+00:01:25,000 --> 00:01:31,000
+When an elder needs help understanding an unfamiliar form, they can open Sakha in Telugu or Hindi.
+
+14
+00:01:31,500 --> 00:01:38,500
+The Explain helper summarizes the page in two simple sentences, using only masked text with zero PII.
+
+15
+00:01:39,000 --> 00:01:45,500
+Most importantly, look at the network panel. Exactly zero bytes leave the machine (RESULTS.md §3).
+
+16
+00:01:46,000 --> 00:01:52,500
+No Aadhaar digits, passwords, or browsing history are ever transmitted off-device.
+
+17
+00:01:53,000 --> 00:02:02,000
+Sakha is built for accessible dignity: large touch targets, WCAG double-A contrast, and on-device privacy.
+
+18
+00:02:02,500 --> 00:02:10,000
+Empowering India's seniors to browse with confidence. Open source at github.com/sathvikbadam/Sakha.

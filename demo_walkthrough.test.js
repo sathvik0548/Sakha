@@ -61,7 +61,7 @@ const SCENARIOS = [
     file:     "genuine-banking.html",
     label:    "Genuine Banking Page",
     expected: "SAFE",
-    mustContainText: ["HDFC Bank", "NetBanking", "hdfcbank.com"],
+    mustContainText: ["Horizon Trust Bank", "NetBanking", "hdfcbank.com", "DEMO — NOT A REAL SITE"],
     // Has security reminder — no credential combo
     mustContainId: ["nb-cid", "nb-pass", "nb-login-btn"],
     mustNotContainId: ["kyc-cvv", "upi-pin"],
@@ -129,6 +129,13 @@ test.describe("Sakha Demo Mode — Page Structure Walkthrough", () => {
         expect(upiPinFields).toBe(0);
         console.log(`  [${scenario.id}] ✅ safe — no UPI PIN trap`);
       }
+
+      // ── 6. Save screenshot for visual review by judges ──
+      const screenshotsDir = path.resolve(__dirname, "submission/screenshots");
+      if (!fs.existsSync(screenshotsDir)) fs.mkdirSync(screenshotsDir, { recursive: true });
+      const screenshotPath = path.join(screenshotsDir, `${scenario.id}.png`);
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`  [${scenario.id}] screenshot → submission/screenshots/${scenario.id}.png`);
 
       console.log(`  [${scenario.id}] PASS`);
     });

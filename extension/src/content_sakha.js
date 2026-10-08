@@ -20,14 +20,71 @@ let pageEvaluation = null;
 
 // Load preferred language from storage if available
 if (typeof chrome !== "undefined" && chrome.storage?.local) {
-  chrome.storage.local.get(["sakha_lang"], (data) => {
+  chrome.storage.local.get(["sakha_consent_accepted", "sakha_lang"], (data) => {
     if (data?.sakha_lang) {
       currentLanguage = data.sakha_lang;
     }
-    initializeSakha();
+    if (!data?.sakha_consent_accepted) {
+      renderConsentModal();
+    } else {
+      initializeSakha();
+    }
   });
 } else {
   initializeSakha();
+}
+
+// ---------------------------------------------------------------------------
+// First-Run Consent Modal
+// ---------------------------------------------------------------------------
+function renderConsentModal() {
+  if (document.getElementById("sakha-consent-root")) return;
+
+  const root = document.createElement("div");
+  root.id = "sakha-consent-root";
+
+  const titleEn = t("consent_title", "en");
+  const titleLang = t("consent_title", currentLanguage);
+  const bodyEn = t("consent_body", "en");
+  const bodyLang = t("consent_body", currentLanguage);
+  const agreeEn = t("consent_agree", "en");
+  const agreeLang = t("consent_agree", currentLanguage);
+
+  root.innerHTML = `
+    <div class="sakha-modal-card caution" style="max-width:480px;">
+      <div class="sakha-modal-header">
+        <span class="sakha-icon">🛡️</span>
+        <div>
+          <h2>${titleEn}</h2>
+          <div style="font-size:15px;opacity:0.9;margin-top:4px;">${titleLang}</div>
+        </div>
+      </div>
+      <div class="sakha-modal-body">
+        <div class="sakha-modal-reason-en">${bodyEn}</div>
+        <div class="sakha-modal-reason-te">${bodyLang}</div>
+        <div class="sakha-modal-actions">
+          <button id="sakha-consent-agree" class="sakha-btn sakha-btn-primary">
+            ✅ ${agreeEn} / ${agreeLang}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(root);
+
+  document.getElementById("sakha-consent-agree")?.addEventListener("click", () => {
+    if (typeof chrome !== "undefined" && chrome.storage?.local) {
+      chrome.storage.local.set({ sakha_consent_accepted: true }, () => {
+        logPilotEvent("CONSENT_GIVEN", { lang: currentLanguage });
+        root.remove();
+        initializeSakha();
+      });
+    } else {
+      root.remove();
+      initializeSakha();
+    }
+  });
 }
 
 function initializeSakha() {

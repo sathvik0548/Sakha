@@ -5,7 +5,7 @@
  * Stored under key "custom_server_url" in chrome.storage.local for popup overrides.
  */
 
-export const DEFAULT_SERVER_URL = "https://visual-pereption.onrender.com";
+export const DEFAULT_SERVER_URL = "http://localhost:3000";
 export const STORAGE_SERVER_KEY = "custom_server_url";
 
 /**

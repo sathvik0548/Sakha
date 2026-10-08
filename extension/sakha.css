@@ -110,29 +110,29 @@
 .sakha-modal-reason-en {
   font-size: 20px !important;
   font-weight: 700 !important;
-  color: #991b1b !important;
+  color: #7f1d1d !important;
   line-height: 1.4 !important;
   margin-bottom: 14px !important;
 }
 
 .sakha-modal-card.caution .sakha-modal-reason-en {
-  color: #92400e !important;
+  color: #78350f !important;
 }
 
 .sakha-modal-reason-te {
   font-size: 19px !important;
   font-weight: 600 !important;
-  color: #334155 !important;
+  color: #0f172a !important;
   line-height: 1.5 !important;
   background: #f8fafc !important;
   padding: 14px 18px !important;
   border-radius: 10px !important;
-  border-left: 5px solid #dc2626 !important;
+  border-left: 5px solid #991b1b !important;
   margin-bottom: 24px !important;
 }
 
 .sakha-modal-card.caution .sakha-modal-reason-te {
-  border-left-color: #d97706 !important;
+  border-left-color: #b45309 !important;
 }
 
 .sakha-modal-actions {
@@ -143,6 +143,7 @@
 
 .sakha-btn {
   width: 100% !important;
+  min-height: 52px !important;
   padding: 16px 20px !important;
   font-size: 18px !important;
   font-weight: 700 !important;
@@ -169,26 +170,34 @@
 }
 
 .sakha-btn-primary {
-  background: #dc2626 !important;
+  background: #991b1b !important;
   color: #ffffff !important;
 }
 
 .sakha-btn-primary:hover {
-  background: #b91c1c !important;
+  background: #7f1d1d !important;
 }
 
 .sakha-btn-secondary {
-  background: #f1f5f9 !important;
-  color: #1e293b !important;
-  border: 2px solid #94a3b8 !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 2px solid #64748b !important;
 }
 
 .sakha-btn-secondary:hover {
   background: #e2e8f0 !important;
-  color: #0f172a !important;
+  color: #000000 !important;
 }
 
 @keyframes sakhaFadeIn {
   from { opacity: 0; transform: translateY(-12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

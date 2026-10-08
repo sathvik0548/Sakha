@@ -9,15 +9,15 @@ export const STRINGS = {
   en: {
     app_name: "Sakha",
     app_subtitle: "Your Digital Safety Companion",
-    warning_danger_title: "DANGER: Potential Scam Detected",
-    warning_caution_title: "CAUTION: Suspicious Page Activity",
-    warning_safe_title: "Page Appears Safe",
+    warning_danger_title: "Please Stop: This Site May Be Unsafe",
+    warning_caution_title: "Check Carefully: Something Looks Unusual",
+    warning_safe_title: "This page looks safe to use",
     
-    rule_fake_domain: "This website name looks like a fake version of an official bank or government site.",
-    rule_pin_to_receive: "Warning: You NEVER need to enter your UPI PIN to receive money.",
-    rule_sensitive_combo: "Danger: This unofficial site is asking for your card number, CVV, and OTP/PIN together.",
-    rule_urgency_threat: "This page is using urgent or threatening words (like account blocked, SIM deactivated) to rush you.",
-    rule_apk_download: "Warning: This page is asking to download an unknown app (.apk or remote access app).",
+    rule_fake_domain: "This web address looks like a fake copy of a real website. Close this page.",
+    rule_pin_to_receive: "Do not enter your UPI PIN. You only type your PIN to send money, never to receive it.",
+    rule_sensitive_combo: "Do not share card details here. This unofficial page is asking for your card number, CVV, and PIN.",
+    rule_urgency_threat: "Take your time. Real banks do not threaten to block your account immediately.",
+    rule_apk_download: "Do not install this download. This page is asking you to install an unknown mobile file.",
     
     masked_badge: "Hidden for your protection",
     tap_to_reveal: "Tap once to see",
@@ -30,24 +30,28 @@ export const STRINGS = {
     consent_body: "Sakha stays completely on your device. Your Aadhaar, cards, and personal details are never sent to any server.",
     consent_agree: "I Agree & Start Protection",
     
-    loading_explanation: "Analyzing what this page is asking safely...",
-    explain_error: "Could not explain this page at this time.",
-    explain_offline: "Explain is offline. The optional explain feature needs the local Sakha server running (see README). No content was generated.",
-    explain_safe_summary: "Page Summary:"
+    loading_explanation: "Checking what this page is asking safely...",
+    explain_error: "Could not explain this page right now.",
+    explain_offline: "Helper is resting. The optional explanation helper needs the local assistant server running. Your on-device safety remains active.",
+    explain_safe_summary: "Page Summary:",
+
+    state_unsupported_page: "Sakha stays idle on internal browser pages. You are safe here.",
+    state_page_loading: "Checking this page for safety...",
+    state_active_protecting: "Sakha is active and protecting your screen."
   },
   
   te: {
     app_name: "సఖ (Sakha)",
     app_subtitle: "మీ డిజిటల్ భద్రతా సహాయకుడు",
-    warning_danger_title: "ప్రమాదం: మోసపూరిత సైట్ కావచ్చు",
-    warning_caution_title: "జాగ్రత్త: అనుమానాస్పద పేజీ",
-    warning_safe_title: "ఈ పేజీ సురక్షితంగా ఉంది",
+    warning_danger_title: "దయచేసి ఆగండి: ఈ సైట్ సురక్షితం కాకపోవచ్చు",
+    warning_caution_title: "జాగ్రత్తగా చూడండి: ఇక్కడ ఏదో తేడాగా ఉంది",
+    warning_safe_title: "ఈ పేజీ ఉపయోగించడానికి సురక్షితంగా ఉంది",
     
-    rule_fake_domain: "ఈ వెబ్‌సైట్ పేరు అసలైన బ్యాంక్ లేదా ప్రభుత్వ సైట్‌లా కనిపిస్తున్న నకిలీ సైట్ కావచ్చు.",
-    rule_pin_to_receive: "హెచ్చరిక: డబ్బులు అందుకోవడానికి మీరు ఎప్పుడూ UPI పిన్ (PIN) నమోదు చేయవలసిన అవసరం లేదు.",
-    rule_sensitive_combo: "ప్రమాదం: ఈ అనధికారిక సైట్ మీ కార్డ్ నంబర్, CVV మరియు OTP ఒకేసారి అడుగుతోంది.",
-    rule_urgency_threat: "మీ ఖాతా నిలిపివేయబడుతుందని లేదా సిమ్ రద్దవుతుందని బెదిరించి మిమ్మల్ని తొందరపెడుతున్నారు.",
-    rule_apk_download: "హెచ్చరిక: ఈ పేజీ ప్రమాదకరమైన మొబైల్ యాప్‌ను (APK) డౌన్‌లోడ్ చేసుకోమని చెబుతోంది.",
+    rule_fake_domain: "ఈ వెబ్‌సైట్ చిరునామా అసలైన సైట్ నకిలీ కాపీలా ఉంది. ఈ పేజీని మూసివేయండి.",
+    rule_pin_to_receive: "మీ UPI పిన్ నమోదు చేయవద్దు. డబ్బు పంపడానికి మాత్రమే పిన్ కావాలి, తీసుకోవడానికి కాదు.",
+    rule_sensitive_combo: "ఇక్కడ మీ కార్డ్ వివరాలు ఇవ్వవద్దు. ఈ అనధికారిక పేజీ కార్డ్ నంబర్, CVV మరియు పిన్ అడుగుతోంది.",
+    rule_urgency_threat: "కంగారు పడవద్దు. అసలైన బ్యాంకులు ఖాతా వెంటనే ఆగిపోతుందని బెదిరించవు.",
+    rule_apk_download: "ఈ ఫైల్ ఇన్‌స్టాల్ చేయవద్దు. ఈ పేజీ తెలియని మొబైల్ ఫైల్ డౌన్‌లోడ్ చేసుకోమని చెబుతోంది.",
     
     masked_badge: "మీ రక్షణ కోసం దాచబడింది",
     tap_to_reveal: "చూడటానికి తాకండి",
@@ -62,22 +66,26 @@ export const STRINGS = {
     
     loading_explanation: "పేజీ వివరాలను సురక్షితంగా పరిశీలిస్తున్నాము...",
     explain_error: "ప్రస్తుతం ఈ పేజీని వివరించడం సాధ్యం కాలేదు.",
-    explain_offline: "వివరణ ఆఫ్‌లైన్‌లో ఉంది. ఈ సేవ స్థానిక Sakha సర్వర్‌పై ఆధారపడుతుంది (README చూడండి). ఎటువంటి సమాధానం రూపొందించబడలేదు.",
-    explain_safe_summary: "పేజీ సారాంశం:"
+    explain_offline: "సహాయకుడు విశ్రాంతిలో ఉన్నారు. ఈ అదనపు వివరణకు స్థానిక సహాయక సర్వర్ అవసరం. మీ పరికర భద్రత ఎల్లప్పుడూ పనిచేస్తుంది.",
+    explain_safe_summary: "పేజీ సారాంశం:",
+
+    state_unsupported_page: "బ్రౌజర్ అంతర్గత పేజీలలో సఖ విశ్రాంతిగా ఉంటుంది. ఇక్కడ మీరు సురక్షితంగా ఉన్నారు.",
+    state_page_loading: "ఈ పేజీ భద్రతను పరిశీలిస్తున్నాము...",
+    state_active_protecting: "సఖ మీ స్క్రీన్‌పై రక్షణ కల్పిస్తోంది."
   },
 
   hi: {
     app_name: "सखा (Sakha)",
     app_subtitle: "आपका डिजिटल सुरक्षा साथी",
-    warning_danger_title: "खतरा: यह वेबसाइट धोखाधड़ी हो सकती है",
-    warning_caution_title: "सावधानी: संदिग्ध गतिविधि",
-    warning_safe_title: "यह पेज सुरक्षित प्रतीत होता है",
+    warning_danger_title: "कृपया रुकें: यह साइट असुरक्षित हो सकती है",
+    warning_caution_title: "ध्यान से देखें: कुछ असामान्य लग रहा है",
+    warning_safe_title: "यह पेज उपयोग के लिए सुरक्षित लगता है",
     
-    rule_fake_domain: "यह वेबसाइट किसी बैंक या सरकारी पोर्टल का नकली रूप लगती है।",
-    rule_pin_to_receive: "चेतावनी: पैसे पाने के लिए कभी भी यूपीआई पिन (PIN) दर्ज करने की आवश्यकता नहीं होती।",
-    rule_sensitive_combo: "खतरा: यह अनधिकृत साइट आपके कार्ड नंबर, सीवीवी और ओटीपी को एक साथ मांग रही है।",
-    rule_urgency_threat: "यह पेज आपको डराने या जल्दबाजी करने की कोशिश कर रहा है (खाता बंद होने की धमकी)।",
-    rule_apk_download: "चेतावनी: यह पेज अज्ञात ऐप या रिमोट ऐप डाउनलोड करने के लिए कह रहा है।",
+    rule_fake_domain: "यह वेब पता किसी असली वेबसाइट की नकली कॉपी लगता है। इस पेज को बंद करें।",
+    rule_pin_to_receive: "अपना यूपीआई पिन न डालें। पिन केवल पैसे भेजने के लिए होता है, पाने के लिए कभी नहीं।",
+    rule_sensitive_combo: "यहाँ कार्ड विवरण न दें। यह अनधिकृत पेज आपके कार्ड का नंबर, सीवीवी और पिन मांग रहा है।",
+    rule_urgency_threat: "जल्दबाजी न करें। असली बैंक खाता तुरंत बंद करने की धमकी नहीं देते।",
+    rule_apk_download: "इस फ़ाइल को इंस्टॉल न करें। यह पेज अनजान मोबाइल फ़ाइल डाउनलोड करने को कह रहा है।",
     
     masked_badge: "आपकी सुरक्षा के लिए छिपाया गया",
     tap_to_reveal: "देखने के लिए टैप करें",
@@ -92,8 +100,12 @@ export const STRINGS = {
     
     loading_explanation: "पेज का सुरक्षित रूप से विश्लेषण किया जा रहा है...",
     explain_error: "इस समय पेज की व्याख्या नहीं की जा सकी।",
-    explain_offline: "व्याख्या सेवा ऑफलाइन है। यह सुविधा स्थानीय Sakha सर्वर पर निर्भर करती है (README देखें)। कोई उत्तर नहीं बनाया गया।",
-    explain_safe_summary: "पेज सारांश:"
+    explain_offline: "सहायक अभी उपलब्ध नहीं है। इस अतिरिक्त व्याख्या के लिए स्थानीय सर्वर चाहिए। आपकी डिवाइस सुरक्षा हमेशा सक्रिय है।",
+    explain_safe_summary: "पेज सारांश:",
+
+    state_unsupported_page: "ब्राउज़र के आंतरिक पेजों पर सखा निष्क्रिय रहता है। आप यहाँ सुरक्षित हैं।",
+    state_page_loading: "इस पेज की सुरक्षा जाँची जा रही है...",
+    state_active_protecting: "सखा सक्रिय है और आपकी स्क्रीन की सुरक्षा कर रहा है।"
   }
 };
 

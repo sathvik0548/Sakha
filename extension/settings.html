@@ -121,14 +121,14 @@
       .field-label {
         font-size: 13px;
         font-weight: 600;
-        color: #334155;
+        color: #1e293b;
         padding-top: 9px;
         line-height: 1.3;
       }
       .field-label .sub {
-        font-size: 10px;
-        font-weight: 400;
-        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 600;
+        color: #475569;
         display: block;
         margin-top: 2px;
         font-family: ui-monospace, monospace;
@@ -144,29 +144,30 @@
       input[type="date"],
       input[type="password"] {
         width: 100%;
-        padding: 8px 10px;
+        min-height: 44px;
+        padding: 10px 12px;
         border: 1px solid #cbd5e1;
-        border-radius: 5px;
-        font-size: 13px;
+        border-radius: 6px;
+        font-size: 14px;
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         color: #1e293b;
         background: #fff;
         transition: border-color 0.15s;
       }
-      input:focus {
-        outline: none;
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 2px rgba(245,158,11,0.15);
+      input:focus-visible {
+        outline: 3px solid #2563eb;
+        outline-offset: 1px;
+        border-color: #2563eb;
       }
       input.sensitive-field {
         letter-spacing: 0.08em;
       }
       .field-hint {
-        font-size: 10px;
-        color: #94a3b8;
+        font-size: 11px;
+        color: #475569;
         font-family: ui-monospace, monospace;
       }
-      .field-hint.warn { color: #d97706; }
+      .field-hint.warn { color: #92400e; font-weight: 500; }
 
       /* ── Save button ── */
       .save-bar {
@@ -176,6 +177,7 @@
         margin-top: 24px;
       }
       #saveBtn {
+        min-height: 44px;
         padding: 11px 28px;
         background: #1a1a2e;
         color: #fff;
@@ -264,17 +266,17 @@
     </style>
   </head>
   <body>
-    <div class="top-bar">
-      <div class="logo">🔒</div>
+    <header class="top-bar">
+      <div class="logo" aria-hidden="true">🔒</div>
       <div>
         <h1>Agent Profile Settings</h1>
         <p>LOCAL STORAGE ONLY — chrome.storage.local — PERSISTED CLIENT-SIDE</p>
       </div>
-    </div>
+    </header>
 
-    <div class="container">
+    <main class="container">
       <div class="privacy-notice">
-        <span class="icon">🛡️</span>
+        <span class="icon" aria-hidden="true">🛡️</span>
         <div>
           <strong>Privacy guarantee:</strong> All personal and sensitive values are stored exclusively in your browser's
           <code>chrome.storage.local</code>. They are never transmitted over the network in raw form.
@@ -288,11 +290,11 @@
       </div>
 
       <!-- ── Section 1: Personal & Academic Info ── -->
-      <div class="section">
-        <div class="section-header">👤 Personal & Academic Information <span class="tag sensitive">Client-only · Never transmitted</span></div>
+      <section class="section" aria-labelledby="sec-personal">
+        <div class="section-header" id="sec-personal">👤 Personal & Academic Information <span class="tag sensitive">Client-only · Never transmitted</span></div>
 
         <div class="field-row">
-          <div class="field-label">Full Name <span class="sub">NAME</span></div>
+          <label class="field-label" for="field-NAME">Full Name <span class="sub">NAME</span></label>
           <div class="field-input">
             <input type="text" id="field-NAME" autocomplete="name" placeholder="Rajesh Kumar" />
             <span class="field-hint warn">⚠ Stored locally only. Used to fill Name and Applicant fields.</span>
@@ -300,7 +302,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Email Address <span class="sub">EMAIL</span></div>
+          <label class="field-label" for="field-EMAIL">Email Address <span class="sub">EMAIL</span></label>
           <div class="field-input">
             <input type="email" id="field-EMAIL" autocomplete="email" placeholder="rajesh.kumar@example.in" />
             <span class="field-hint warn">⚠ Stored locally only. Auto-trimmed and sanitized.</span>
@@ -308,7 +310,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Phone / Mobile <span class="sub">PHONE / MOBILE</span></div>
+          <label class="field-label" for="field-PHONE">Phone / Mobile <span class="sub">PHONE / MOBILE</span></label>
           <div class="field-input">
             <input type="tel" id="field-PHONE" autocomplete="tel" placeholder="9876543210" maxlength="10" />
             <span class="field-hint warn">⚠ Stored locally only. 10-digit Indian mobile number.</span>
@@ -316,7 +318,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Department <span class="sub">DEPARTMENT</span></div>
+          <label class="field-label" for="field-DEPARTMENT">Department <span class="sub">DEPARTMENT</span></label>
           <div class="field-input">
             <input type="text" id="field-DEPARTMENT" placeholder="CSE" />
             <span class="field-hint warn">⚠ Stored locally only. Auto-matched in radio & dropdown choices (e.g. CSE).</span>
@@ -324,7 +326,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Year of Study <span class="sub">YEAR</span></div>
+          <label class="field-label" for="field-YEAR">Year of Study <span class="sub">YEAR</span></label>
           <div class="field-input">
             <input type="text" id="field-YEAR" placeholder="3rd Year" />
             <span class="field-hint warn">⚠ Stored locally only. Auto-matched in radio & dropdown choices (e.g. 3rd Year).</span>
@@ -332,7 +334,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Date of Birth <span class="sub">DOB</span></div>
+          <label class="field-label" for="field-DOB">Date of Birth <span class="sub">DOB</span></label>
           <div class="field-input">
             <input type="date" id="field-DOB" autocomplete="bday" />
             <span class="field-hint warn">⚠ Stored locally only. Stored as YYYY-MM-DD for date pickers.</span>
@@ -340,7 +342,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Address <span class="sub">ADDRESS</span></div>
+          <label class="field-label" for="field-ADDRESS">Address <span class="sub">ADDRESS</span></label>
           <div class="field-input">
             <input type="text" id="field-ADDRESS" autocomplete="address-line1" placeholder="42, MG Road, Bengaluru" />
             <span class="field-hint warn">⚠ Stored locally only. Used for shipping and billing addresses.</span>
@@ -348,7 +350,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">City <span class="sub">CITY</span></div>
+          <label class="field-label" for="field-CITY">City <span class="sub">CITY</span></label>
           <div class="field-input">
             <input type="text" id="field-CITY" autocomplete="address-level2" placeholder="Bengaluru" />
             <span class="field-hint warn">⚠ Stored locally only. Auto-filled in city and region inputs.</span>
@@ -356,20 +358,20 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Pincode / ZIP <span class="sub">PINCODE</span></div>
+          <label class="field-label" for="field-PINCODE">Pincode / ZIP <span class="sub">PINCODE</span></label>
           <div class="field-input">
             <input type="text" id="field-PINCODE" autocomplete="postal-code" placeholder="560001" maxlength="6" />
             <span class="field-hint warn">⚠ Stored locally only. 6-digit postal code.</span>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- ── Section 2: Financial & Identification Credentials ── -->
-      <div class="section">
-        <div class="section-header">🔐 Financial & Identity Credentials <span class="tag sensitive">Client-only · Never transmitted</span></div>
+      <section class="section" aria-labelledby="sec-finance">
+        <div class="section-header" id="sec-finance">🔐 Financial & Identity Credentials <span class="tag sensitive">Client-only · Never transmitted</span></div>
 
         <div class="field-row">
-          <div class="field-label">Aadhaar Number <span class="sub">AADHAAR</span></div>
+          <label class="field-label" for="field-AADHAAR">Aadhaar Number <span class="sub">AADHAAR</span></label>
           <div class="field-input">
             <input type="text" id="field-AADHAAR" class="sensitive-field" autocomplete="off"
                    placeholder="XXXX XXXX XXXX" maxlength="14" data-mask="true" inputmode="numeric" />
@@ -378,7 +380,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">PAN Card <span class="sub">PAN</span></div>
+          <label class="field-label" for="field-PAN">PAN Card <span class="sub">PAN</span></label>
           <div class="field-input">
             <input type="text" id="field-PAN" class="sensitive-field" autocomplete="off"
                    placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase" />
@@ -387,7 +389,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">GSTIN <span class="sub">GSTIN</span></div>
+          <label class="field-label" for="field-GSTIN">GSTIN <span class="sub">GSTIN</span></label>
           <div class="field-input">
             <input type="text" id="field-GSTIN" class="sensitive-field" autocomplete="off"
                    placeholder="29ABCDE1234F1Z5" maxlength="15" style="text-transform:uppercase" />
@@ -396,7 +398,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">IFSC Code <span class="sub">IFSC</span></div>
+          <label class="field-label" for="field-IFSC">IFSC Code <span class="sub">IFSC</span></label>
           <div class="field-input">
             <input type="text" id="field-IFSC" class="sensitive-field" autocomplete="off"
                    placeholder="HDFC0001234" maxlength="11" style="text-transform:uppercase" />
@@ -405,7 +407,7 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Bank Account <span class="sub">BANK_ACCOUNT</span></div>
+          <label class="field-label" for="field-BANK_ACCOUNT">Bank Account <span class="sub">BANK_ACCOUNT</span></label>
           <div class="field-input">
             <input type="text" id="field-BANK_ACCOUNT" class="sensitive-field" autocomplete="off"
                    placeholder="12345678901234" maxlength="20" />
@@ -414,13 +416,13 @@
         </div>
 
         <div class="field-row">
-          <div class="field-label">Default Password <span class="sub">PASSWORD</span></div>
+          <label class="field-label" for="field-PASSWORD">Default Password <span class="sub">PASSWORD</span></label>
           <div class="field-input">
             <input type="password" id="field-PASSWORD" autocomplete="new-password" placeholder="••••••••" />
             <span class="field-hint warn">⚠ Stored locally only. Used to fill password fields on trusted sites.</span>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- ── Completeness bar ── -->
       <div id="completenessBar">
@@ -488,7 +490,7 @@
         <button id="clearBtn">Clear All</button>
         <div id="toast"></div>
       </div>
-    </div>
+    </main>
 
     <script type="module" src="settings.js"></script>
   </body>

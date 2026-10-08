@@ -177,6 +177,10 @@ function renderSeniorWarningModal(evaluation) {
 
   const root = document.createElement("div");
   root.id = "sakha-alert-modal-root";
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-labelledby", "sakha-alert-title");
+  root.setAttribute("aria-describedby", "sakha-alert-desc");
 
   const isDanger = evaluation.level === "danger";
   const icon = isDanger ? "🚨" : "⚠️";
@@ -195,10 +199,12 @@ function renderSeniorWarningModal(evaluation) {
 
   const iconEl = document.createElement("span");
   iconEl.className = "sakha-icon";
+  iconEl.setAttribute("aria-hidden", "true");
   iconEl.textContent = icon;
 
   const titleWrap = document.createElement("div");
   const h2 = document.createElement("h2");
+  h2.id = "sakha-alert-title";
   h2.textContent = titleEn;
   const subTitle = document.createElement("div");
   subTitle.style.cssText = "font-size:16px;opacity:0.9;margin-top:4px";
@@ -209,6 +215,7 @@ function renderSeniorWarningModal(evaluation) {
   header.appendChild(titleWrap);
 
   const body = document.createElement("div");
+  body.id = "sakha-alert-desc";
   body.className = "sakha-modal-body";
 
   const reasonEnEl = document.createElement("div");

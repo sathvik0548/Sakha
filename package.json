@@ -12,7 +12,9 @@
     "evaluate": "node evaluation/evaluate_scam_detection.js"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
+    "axe-core": "^4.14.0",
     "playwright": "^1.63.0"
   }
 }

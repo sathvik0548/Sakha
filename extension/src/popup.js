@@ -52,18 +52,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   updateUiLanguage(currentLang);
 
-  // Query active tab page safety status
+  // Query active tab page safety status with graceful edge state handling
   function queryPageStatus() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const activeTab = tabs[0];
       if (!activeTab?.id) return;
 
+      const url = activeTab.url || "";
+      const isInternalPage = url.startsWith("chrome://") || 
+                            url.startsWith("chrome-extension://") || 
+                            url.startsWith("edge://") || 
+                            url.startsWith("about:");
+
+      if (isInternalPage) {
+        statusCard.className = "status-card";
+        statusIcon.textContent = "🛡️";
+        statusTitle.textContent = t("app_name", currentLang);
+        statusDetail.textContent = t("state_unsupported_page", currentLang);
+        return;
+      }
+
       chrome.tabs.sendMessage(activeTab.id, { type: "GET_PAGE_SAFETY" }, (res) => {
         if (chrome.runtime.lastError || !res?.evaluation) {
           statusCard.className = "status-card";
           statusIcon.textContent = "🛡️";
-          statusTitle.textContent = "Sakha Active";
-          statusDetail.textContent = "Masking sensitive details on-screen.";
+          statusTitle.textContent = t("app_name", currentLang);
+          statusDetail.textContent = t("state_active_protecting", currentLang);
           return;
         }
 
@@ -82,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           statusCard.className = "status-card";
           statusIcon.textContent = "✓";
           statusTitle.textContent = t("warning_safe_title", currentLang);
-          statusDetail.textContent = "No scam or deceptive patterns detected on this site.";
+          statusDetail.textContent = t("rule_safe_detail", currentLang) || "No scam or deceptive patterns detected on this site.";
         }
       });
     });

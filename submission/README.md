@@ -24,9 +24,10 @@
      - **Phone Numbers** (Indian mobile formats)
    - **Tap-to-Reveal:** Smooth click-to-unblur interaction. Form values remain intact for native submissions.
 
-3. **Plain-Language "Explain" Assistant**
+3. **Plain-Language "Explain" Assistant** *(Prototype — requires optional local server)*
    - Seniors can click *"What is this page asking me?"* / *"ఈ పేజీ నన్ను ఏమి అడుగుతోంది?"* to receive a gentle 2-sentence summary.
    - **Privacy Boundary:** Text sent to the summary assistant is **strictly pre-masked**. No unredacted PII ever leaves the browser.
+   - **Offline Behaviour:** When the local server is not running, Sakha displays an honest *"Explain is offline"* message — it never generates canned text disguised as AI output.
 
 4. **Field Pilot Tooling & Zero-PII Telemetry**
    - First-run plain-language onboarding consent modal.
@@ -42,8 +43,8 @@ Tested against 60 synthetic pages (30 scam, 30 genuine) divided into 70% Tuning 
 |---|---|---|---|
 | **Scam Detection Rate (Recall)** | **100.00%** (21/21) | **100.00%** (9/9) | > 95% |
 | **False-Alarm Rate** | **0.00%** (0/21) | **0.00%** (0/9) | < 5% |
-| **Scam Engine Latency** | **0.150 ms** / page | **0.068 ms** / page | < 10 ms |
-| **DOM Masking Traversal** | **13.03 ms** / heavy page | **13.03 ms** / heavy page | < 50 ms |
+| **Scam Engine Latency** | **~0.137–0.150 ms** / page | **~0.066–0.068 ms** / page | < 10 ms |
+| **DOM Masking Traversal** | **13–20 ms** / heavy page (1,000 nodes) | **13–20 ms** / heavy page | < 50 ms |
 
 *Full results logged in `evaluation/evaluation_report.json`.*
 
@@ -62,6 +63,16 @@ Tested against 60 synthetic pages (30 scam, 30 genuine) divided into 70% Tuning 
 ```bash
 cd sakha-sfic
 
+# Install root dependencies (Playwright)
+npm install
+
+# Install extension dependencies (jsdom — required for privacy & masking tests)
+cd extension && npm install && cd ..
+
+# Run all tests with a single command
+npm test
+
+# Or run individual suites:
 # Run Scam Engine Unit Tests
 node extension/test_scamDetector.js
 
@@ -71,7 +82,7 @@ node extension/test_maskEngine.js
 # Run Privacy Event Logger Tests
 node extension/test_eventLogger.js
 
-# Run Low-End Hardware Performance Check
+# Run Low-End Hardware Performance Check (requires extension deps above)
 node extension/benchmark_masking_perf.js
 
 # Run Complete Synthetic Benchmark (Tuning & Hold-out sets)
@@ -106,7 +117,7 @@ Demo Mode lets evaluators and pilot facilitators see Sakha's detection capabilit
 | 1 | Fake KYC (sbi.co.in-kyc-portal.top) | 🚨 DANGER |
 | 2 | UPI Collect Trap (upi-rewards-claim.xyz) | 🚨 DANGER |
 | 3 | Pension Registration (pmsr.gov.in) | ✅ SAFE |
-| 4 | HDFC NetBanking (hdfcbank.com) | ✅ SAFE |
+| 4 | Horizon Trust Bank NetBanking — Demo (hdfcbank.com domain) | ✅ SAFE |
 
 Click **↺ Reset Demo** to close all demo tabs and disable the mode.
 
@@ -114,7 +125,7 @@ Click **↺ Reset Demo** to close all demo tabs and disable the mode.
 
 ```bash
 cd sakha-sfic
-npm test:demo
+npm run test:demo
 # or
 npx playwright test demo_walkthrough.test.js
 ```

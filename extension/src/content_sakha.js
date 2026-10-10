@@ -9,7 +9,7 @@
  */
 
 import { evaluatePageSafety } from "./scamDetector.js";
-import { applyPageMasking, maskSensitiveText } from "./maskEngine.js";
+import { applyPageMasking, maskSensitiveText, classifyGenericField } from "./maskEngine.js";
 import { logPilotEvent } from "./eventLogger.js";
 import { t } from "./i18n.js";
 
@@ -18,6 +18,146 @@ console.log("[Sakha] On-device safety companion active on:", window.location.hos
 
 let currentLanguage = "en";
 let pageEvaluation = null;
+let reevaluationTimer = null;
+
+// Collect elements across standard DOM, same-origin iframes, and open shadow roots
+function collectAllInputNodes(root = document) {
+  const elements = [];
+
+  function traverse(node) {
+    if (!node) return;
+
+    // Open Shadow DOM traversal
+    if (node.shadowRoot) {
+      traverse(node.shadowRoot);
+    }
+
+    if (node.querySelectorAll) {
+      const inputs = node.querySelectorAll("input, select, textarea");
+      inputs.forEach(el => elements.push(el));
+
+      // Same-origin iframes
+      const iframes = node.querySelectorAll("iframe");
+      iframes.forEach(iframe => {
+        try {
+          if (iframe.contentDocument && iframe.contentDocument.body) {
+            traverse(iframe.contentDocument.body);
+          }
+        } catch {
+          // Cross-origin iframe: security boundary, safely skip
+        }
+      });
+    }
+
+    // Children traversal for custom element shadow roots
+    if (node.children) {
+      for (const child of node.children) {
+        if (child.shadowRoot) traverse(child.shadowRoot);
+      }
+    }
+  }
+
+  traverse(root);
+  return elements;
+}
+
+// Find closest associated label text for an input
+function findAssociatedLabel(el) {
+  if (!el) return "";
+
+  // 1. Explicit <label for="id">
+  if (el.id) {
+    const labelEl = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+    if (labelEl && labelEl.innerText) return labelEl.innerText.trim();
+  }
+
+  // 2. Wrapping <label>
+  const parentLabel = el.closest("label");
+  if (parentLabel && parentLabel.innerText) {
+    return parentLabel.innerText.replace(el.value || "", "").trim();
+  }
+
+  // 3. aria-labelledby
+  const labelledBy = el.getAttribute("aria-labelledby");
+  if (labelledBy) {
+    const labelNode = document.getElementById(labelledBy);
+    if (labelNode && labelNode.innerText) return labelNode.innerText.trim();
+  }
+
+  // 4. aria-label
+  if (el.getAttribute("aria-label")) {
+    return el.getAttribute("aria-label").trim();
+  }
+
+  // 5. Nearby preceding sibling text
+  const prev = el.previousElementSibling;
+  if (prev && prev.innerText && prev.innerText.length < 50) {
+    return prev.innerText.trim();
+  }
+
+  return "";
+}
+
+function extractGenericPageFields() {
+  const rawNodes = collectAllInputNodes(document);
+  const fields = [];
+
+  rawNodes.forEach(el => {
+    // Skip submit and button inputs
+    const type = (el.getAttribute("type") || "text").toLowerCase();
+    if (["submit", "button", "reset", "image"].includes(type)) return;
+
+    const labelText = findAssociatedLabel(el);
+    const nearby = el.parentElement ? (el.parentElement.innerText || "").slice(0, 60) : "";
+
+    const fieldMeta = {
+      name: el.getAttribute("name") || "",
+      id: el.getAttribute("id") || "",
+      placeholder: el.getAttribute("placeholder") || "",
+      autocomplete: el.getAttribute("autocomplete") || "",
+      ariaLabel: el.getAttribute("aria-label") || "",
+      type,
+      label: labelText,
+      nearbyText: nearby,
+      value: el.value || ""
+    };
+
+    const classification = classifyGenericField(fieldMeta);
+
+    // Mask value preview strictly (never expose raw sensitive value)
+    let maskedVal = "";
+    if (fieldMeta.value) {
+      maskedVal = maskSensitiveText(fieldMeta.value);
+    }
+
+    fields.push({
+      id: fieldMeta.id || fieldMeta.name || `field_${fields.length + 1}`,
+      name: fieldMeta.name,
+      label: fieldMeta.label || fieldMeta.name || fieldMeta.id || "Field",
+      detectedType: classification.type,
+      confidence: classification.confidence,
+      evidence: classification.evidence,
+      maskedValue: maskedVal,
+      element: el
+    });
+  });
+
+  return fields;
+}
+
+// Removable highlights on analyzed fields
+function highlightAnalyzedFields(fields) {
+  // Clear any existing highlights
+  document.querySelectorAll(".sakha-analyzed-outline").forEach(el => {
+    el.classList.remove("sakha-analyzed-outline");
+  });
+
+  fields.forEach(f => {
+    if (f.element && f.element.classList) {
+      f.element.classList.add("sakha-analyzed-outline");
+    }
+  });
+}
 
 // Load preferred language from storage if available
 if (typeof chrome !== "undefined" && chrome.storage?.local) {
@@ -126,9 +266,13 @@ function initializeSakha() {
     console.warn("[Sakha] Masking error:", err);
   }
 
-  // 2. Continuous masking on dynamic DOM updates (e.g. SPAs, live feeds)
+  // 2. Continuous masking and debounced safety check on dynamic DOM updates (SPAs)
   const observer = new MutationObserver(() => {
     applyPageMasking(document, currentLanguage);
+    if (reevaluationTimer) clearTimeout(reevaluationTimer);
+    reevaluationTimer = setTimeout(() => {
+      runPageSafetyCheck();
+    }, 400); // 400ms debounce
   });
   if (document.body) {
     observer.observe(document.body, { childList: true, subtree: true });
@@ -140,23 +284,48 @@ function initializeSakha() {
 
 function runPageSafetyCheck() {
   const pageText = document.body ? document.body.innerText || "" : "";
-  const inputElements = Array.from(document.querySelectorAll("input, select, textarea")).map(el => ({
-    name: el.getAttribute("name") || "",
-    id: el.getAttribute("id") || "",
-    placeholder: el.getAttribute("placeholder") || "",
-    type: el.getAttribute("type") || "",
-    label: el.getAttribute("aria-label") || ""
+  const classifiedFields = extractGenericPageFields();
+  
+  // Highlight analyzed fields on the page with removable outline
+  highlightAnalyzedFields(classifiedFields);
+
+  const inputElements = classifiedFields.map(f => ({
+    name: f.name || "",
+    id: f.id || "",
+    placeholder: "",
+    type: "",
+    label: f.label || ""
   }));
+
   const linkElements = Array.from(document.querySelectorAll("a[href]")).map(a => a.href);
+  const formsCount = document.querySelectorAll("form").length;
+  const framesCount = document.querySelectorAll("iframe, frame").length;
+
+  const serializedFields = classifiedFields.map(f => ({
+    id: f.id,
+    name: f.name,
+    label: f.label,
+    detectedType: f.detectedType,
+    confidence: f.confidence,
+    evidence: f.evidence,
+    maskedValue: f.maskedValue
+  }));
 
   pageEvaluation = evaluatePageSafety({
     url: window.location.href,
     pageText,
     inputs: inputElements,
-    links: linkElements
+    links: linkElements,
+    domStats: {
+      fieldsCount: classifiedFields.length,
+      formsCount,
+      linksCount: linkElements.length,
+      framesCount
+    },
+    classifiedFields: serializedFields
   });
 
-  // SEC-001: Log only level, not full evaluation object (rulesTriggered visible to page DevTools)
+  // SEC-001: Log only level, not full evaluation object
   console.log("[Sakha] Page evaluation:", pageEvaluation.level, "on", pageEvaluation.hostname);
 
   if (pageEvaluation.level === "danger" || pageEvaluation.level === "caution") {

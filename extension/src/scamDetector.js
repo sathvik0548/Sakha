@@ -318,64 +318,164 @@ export function checkMaliciousAppDownloads(text, linkHrefs = []) {
  * @param {string} pageContext.pageText
  * @param {Array}  pageContext.inputs
  * @param {Array}  pageContext.links
- * @returns {Object} { level: 'safe'|'caution'|'danger', rulesTriggered: string[], reasonEn: string, reasonTe: string }
+ * @param {Object} [pageContext.domStats]
+ * @param {Array}  [pageContext.classifiedFields]
+ * @returns {Object} Comprehensive evaluation object
  */
 export function evaluatePageSafety(pageContext) {
-  const { url = "", pageText = "", inputs = [], links = [] } = pageContext;
+  const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const { 
+    url = "", 
+    pageText = "", 
+    inputs = [], 
+    links = [],
+    domStats = { fieldsCount: inputs.length, formsCount: 0, linksCount: links.length, framesCount: 0 },
+    classifiedFields = []
+  } = pageContext;
+
   const hostname = extractHostname(url);
   const isAllowlisted = isAllowlistedDomain(hostname);
 
   const rulesTriggered = [];
+  const rulesDetailed = [];
   let highestLevel = "safe";
   let primaryKey = "warning_safe_title";
 
-  // Check 1: Lookalike domain
+  // Check 1: Lookalike domain (Weight: 90)
   const lookalike = checkLookalikeDomain(hostname);
+  const check1Result = {
+    id: "CHECK_DOMAIN",
+    name: "Domain Reputation & Typosquatting",
+    passed: !lookalike.isLookalike,
+    detail: lookalike.isLookalike ? lookalike.reason : (isAllowlisted ? "Domain is on official allowlist" : "No lookalike or typosquatting patterns detected")
+  };
   if (lookalike.isLookalike) {
     highestLevel = "danger";
     rulesTriggered.push("LOOKALIKE_DOMAIN");
+    rulesDetailed.push({
+      ruleId: "LOOKALIKE_DOMAIN",
+      name: "Lookalike / Phishing Domain",
+      weight: 90,
+      severity: "danger",
+      reason: lookalike.reason
+    });
     primaryKey = "rule_fake_domain";
   }
 
-  // Check 2: UPI Trap
+  // Check 2: UPI Trap (Weight: 85)
   const upiTrap = checkUPITraps(pageText);
+  const check2Result = {
+    id: "CHECK_UPI_TRAP",
+    name: "UPI PIN Collect Traps",
+    passed: !upiTrap.detected,
+    detail: upiTrap.detected ? "Found 'Enter PIN to receive money' pattern" : "No reverse PIN collect patterns found"
+  };
   if (upiTrap.detected) {
     highestLevel = "danger";
     rulesTriggered.push("UPI_PIN_RECEIVE_TRAP");
+    rulesDetailed.push({
+      ruleId: "UPI_PIN_RECEIVE_TRAP",
+      name: "UPI PIN Collection Trap",
+      weight: 85,
+      severity: "danger",
+      reason: "Page asks for UPI PIN under pretext of receiving money or cashback"
+    });
     primaryKey = "rule_pin_to_receive";
   }
 
-  // Check 3: Sensitive Field Combo
+  // Check 3: Sensitive Field Combo (Weight: 80)
   const sensitiveCombo = checkSensitiveFieldCombo(inputs, isAllowlisted);
+  const check3Result = {
+    id: "CHECK_SENSITIVE_COMBO",
+    name: "Credential Harvesting Combination",
+    passed: !sensitiveCombo.detected,
+    detail: sensitiveCombo.detected ? "Simultaneous Card + CVV + PIN/OTP requested on non-allowlisted site" : "No dangerous credential combinations detected"
+  };
   if (sensitiveCombo.detected) {
     highestLevel = "danger";
     rulesTriggered.push("SENSITIVE_CREDENTIAL_COMBO");
+    rulesDetailed.push({
+      ruleId: "SENSITIVE_CREDENTIAL_COMBO",
+      name: "Critical Credential Harvest",
+      weight: 80,
+      severity: "danger",
+      reason: "Unofficial page requests complete card credentials (number, CVV, and PIN/OTP)"
+    });
     primaryKey = "rule_sensitive_combo";
   }
 
-  // Check 4: Remote App / APK download
+  // Check 4: Remote App / APK download (Weight: 65)
   const appDownload = checkMaliciousAppDownloads(pageText, links);
+  const check4Result = {
+    id: "CHECK_APP_DOWNLOAD",
+    name: "Malicious App & APK Prompts",
+    passed: !appDownload.detected,
+    detail: appDownload.detected ? appDownload.reason : "No unknown APKs or remote-desktop tool downloads detected"
+  };
   if (appDownload.detected) {
     if (highestLevel !== "danger") highestLevel = "caution";
     rulesTriggered.push("MALICIOUS_APP_DOWNLOAD");
+    rulesDetailed.push({
+      ruleId: "MALICIOUS_APP_DOWNLOAD",
+      name: "Suspicious App Prompt",
+      weight: 65,
+      severity: "caution",
+      reason: appDownload.reason
+    });
     if (primaryKey === "warning_safe_title") primaryKey = "rule_apk_download";
   }
 
-  // Check 5: Urgency & Threat language
+  // Check 5: Urgency & Threat language (Weight: 50)
   const urgency = checkUrgencyAndThreats(pageText);
+  const check5Result = {
+    id: "CHECK_URGENCY",
+    name: "Intimidation & Pressure Tactics",
+    passed: !urgency.detected,
+    detail: urgency.detected ? `Pressure tactics found (${urgency.matches.join(", ")})` : "No urgency or intimidation phrasing detected"
+  };
   if (urgency.detected) {
     if (highestLevel !== "danger") highestLevel = "caution";
     rulesTriggered.push("URGENCY_THREAT_LANGUAGE");
+    rulesDetailed.push({
+      ruleId: "URGENCY_THREAT_LANGUAGE",
+      name: "Urgency / Threat Intimidation",
+      weight: 50,
+      severity: "caution",
+      reason: `Intimidation keywords detected: ${urgency.matches.join(", ")}`
+    });
     if (primaryKey === "warning_safe_title") primaryKey = "rule_urgency_threat";
   }
+
+  const checks = [check1Result, check2Result, check3Result, check4Result, check5Result];
+  const passedChecksCount = checks.filter(c => c.passed).length;
+  const totalChecksCount = checks.length;
+
+  const endTime = typeof performance !== "undefined" ? performance.now() : Date.now();
+  const analysisTimeMs = +(endTime - startTime).toFixed(2);
+
+  // Safe verdict reason with exact checks count
+  const safeVerdictEn = `No risk signals found among ${totalChecksCount} checks.`;
+  const safeVerdictTe = `${totalChecksCount} భద్రతా తనిఖీలలో ఎలాంటి అనుమానాస్పద సంకేతాలు కనుగొనబడలేదు.`;
+  const safeVerdictHi = `${totalChecksCount} सुरक्षा जांचों में कोई जोखिम संकेत नहीं मिला।`;
+
+  const reasonEn = highestLevel === "safe" ? safeVerdictEn : t(primaryKey, "en");
+  const reasonTe = highestLevel === "safe" ? safeVerdictTe : t(primaryKey, "te");
+  const reasonHi = highestLevel === "safe" ? safeVerdictHi : t(primaryKey, "hi");
 
   return {
     level: highestLevel,
     rulesTriggered,
-    reasonEn: t(primaryKey, "en"),
-    reasonTe: t(primaryKey, "te"),
-    reasonHi: t(primaryKey, "hi"),
+    rulesDetailed,
+    checks,
+    totalChecksCount,
+    passedChecksCount,
+    reasonEn,
+    reasonTe,
+    reasonHi,
     hostname,
-    isAllowlisted
+    isAllowlisted,
+    domStats,
+    fieldsTable: classifiedFields,
+    analysisTimeMs
   };
 }

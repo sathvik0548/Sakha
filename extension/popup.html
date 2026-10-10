@@ -181,6 +181,123 @@
     }
     .btn-export-link:hover { color: #0f172a; }
 
+    /* Live Analysis Panel Styling */
+    .analysis-panel-details {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .analysis-panel-summary {
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f5f9;
+      user-select: none;
+    }
+    .analysis-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #e2e8f0;
+      color: #475569;
+    }
+    .analysis-panel-content {
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+    .metric-val {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .metric-lbl {
+      display: block;
+      font-size: 10px;
+      color: #64748b;
+    }
+    .analysis-subcard {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .time-tag {
+      font-size: 11px;
+      color: #0369a1;
+      background: #e0f2fe;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .checks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .check-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      padding: 3px 0;
+      border-bottom: 1px dashed #f1f5f9;
+    }
+    .check-pass { color: #16a34a; font-weight: 600; }
+    .check-fail { color: #dc2626; font-weight: 600; }
+    .fields-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .fields-table th {
+      text-align: left;
+      padding: 4px 6px;
+      border-bottom: 1px solid #cbd5e1;
+      color: #475569;
+      font-weight: 600;
+    }
+    .fields-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .type-pill {
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -238,6 +355,60 @@
     </button>
 
     <div id="explain-output" class="explain-box"></div>
+
+    <!-- Live Analysis Panel (Driven strictly by real result object) -->
+    <details id="analysis-panel-details" class="analysis-panel-details" open>
+      <summary class="analysis-panel-summary">
+        <span>🔍 Live Safety &amp; Field Analysis</span>
+        <span id="analysis-summary-badge" class="analysis-badge">0 checks</span>
+      </summary>
+
+      <div class="analysis-panel-content">
+        <!-- 1. Scanned Counts -->
+        <div class="metrics-row">
+          <div class="metric-card"><span class="metric-val" id="count-fields">0</span><span class="metric-lbl">Fields</span></div>
+          <div class="metric-card"><span class="metric-val" id="count-forms">0</span><span class="metric-lbl">Forms</span></div>
+          <div class="metric-card"><span class="metric-val" id="count-links">0</span><span class="metric-lbl">Links</span></div>
+          <div class="metric-card"><span class="metric-val" id="count-frames">0</span><span class="metric-lbl">Frames</span></div>
+        </div>
+
+        <!-- 2. Verdict & Measured Time -->
+        <div class="analysis-subcard">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong id="panel-verdict-title">Verdict: Evaluating...</strong>
+            <span id="panel-analysis-time" class="time-tag">-- ms</span>
+          </div>
+          <div id="panel-verdict-reason-en" style="font-size:12px; margin-top:4px; color:#334155;"></div>
+          <div id="panel-verdict-reason-te" style="font-size:12px; margin-top:2px; color:#64748b;"></div>
+        </div>
+
+        <!-- 3. Checks Run & Rules Fired -->
+        <div class="analysis-subcard">
+          <div style="font-weight:600; font-size:12px; margin-bottom:6px;">Safety Checks &amp; Rules</div>
+          <div id="panel-checks-list" class="checks-list"></div>
+        </div>
+
+        <!-- 4. Fields Table (Masked values only) -->
+        <div class="analysis-subcard">
+          <div style="font-weight:600; font-size:12px; margin-bottom:6px;">Discovered Fields &amp; Evidence</div>
+          <div style="overflow-x:auto;">
+            <table class="fields-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Conf</th>
+                  <th>Evidence</th>
+                </tr>
+              </thead>
+              <tbody id="fields-table-body">
+                <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No input fields found</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </details>
 
     <div class="pilot-export">
       <button id="btn-export-logs" class="btn-export-link">Download pilot log (no personal fields recorded)</button>

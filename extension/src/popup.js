@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           statusCard.className = "status-card";
           statusIcon.textContent = "✓";
           statusTitle.textContent = t("warning_safe_title", currentLang);
-          statusDetail.textContent = t("rule_safe_detail", currentLang) || "No scam or deceptive patterns detected on this site.";
+          statusDetail.textContent = localizedReason;
         }
 
         // Dynamically update Masking Feature Bullet
@@ -116,8 +116,122 @@ document.addEventListener("DOMContentLoaded", async () => {
             featureMaskingText.textContent = "No sensitive fields detected on this page";
           }
         }
+
+        // Populate Live Analysis Panel from real result object
+        renderLiveAnalysisPanel(evalData, currentLang);
       });
     });
+  }
+
+  function renderLiveAnalysisPanel(evalData, lang) {
+    if (!evalData) return;
+
+    // 1. Scanned Counts
+    const domStats = evalData.domStats || {};
+    document.getElementById("count-fields").textContent = domStats.fieldsCount ?? 0;
+    document.getElementById("count-forms").textContent = domStats.formsCount ?? 0;
+    document.getElementById("count-links").textContent = domStats.linksCount ?? 0;
+    document.getElementById("count-frames").textContent = domStats.framesCount ?? 0;
+
+    // Badge
+    const summaryBadge = document.getElementById("analysis-summary-badge");
+    if (summaryBadge) {
+      summaryBadge.textContent = `${evalData.totalChecksCount || 5} checks run`;
+    }
+
+    // 2. Verdict & Measured Time
+    const verdictTitle = document.getElementById("panel-verdict-title");
+    const verdictReasonEn = document.getElementById("panel-verdict-reason-en");
+    const verdictReasonTe = document.getElementById("panel-verdict-reason-te");
+    const analysisTime = document.getElementById("panel-analysis-time");
+
+    if (verdictTitle) {
+      const levelLabel = evalData.level === "danger" ? "🚨 Unsafe / Scam Risk" : (evalData.level === "caution" ? "⚠️ Caution Advised" : "✅ Safe");
+      verdictTitle.textContent = `Verdict: ${levelLabel}`;
+      verdictTitle.style.color = evalData.level === "danger" ? "#dc2626" : (evalData.level === "caution" ? "#d97706" : "#16a34a");
+    }
+
+    if (verdictReasonEn) verdictReasonEn.textContent = evalData.reasonEn || "";
+    if (verdictReasonTe) verdictReasonTe.textContent = evalData.reasonTe || "";
+    if (analysisTime) analysisTime.textContent = `${evalData.analysisTimeMs ?? 0.1} ms`;
+
+    // 3. Checks Run & Rules Fired
+    const checksList = document.getElementById("panel-checks-list");
+    if (checksList) {
+      checksList.innerHTML = "";
+      const checks = evalData.checks || [];
+      checks.forEach(chk => {
+        const item = document.createElement("div");
+        item.className = "check-item";
+
+        const left = document.createElement("span");
+        left.textContent = chk.name;
+
+        const right = document.createElement("span");
+        right.className = chk.passed ? "check-pass" : "check-fail";
+        right.textContent = chk.passed ? "✓ Passed" : "⚠ Risk Detected";
+
+        item.appendChild(left);
+        item.appendChild(right);
+        checksList.appendChild(item);
+      });
+
+      // Rules fired with weights
+      const rulesDetailed = evalData.rulesDetailed || [];
+      if (rulesDetailed.length > 0) {
+        const rulesBlock = document.createElement("div");
+        rulesBlock.style.cssText = "margin-top:6px; padding-top:6px; border-top:1px solid #f1f5f9; font-size:11px;";
+        rulesDetailed.forEach(r => {
+          const rEl = document.createElement("div");
+          rEl.style.color = "#dc2626";
+          rEl.textContent = `Rule fired: ${r.name} (weight ${r.weight}/100) — ${r.reason}`;
+          rulesBlock.appendChild(rEl);
+        });
+        checksList.appendChild(rulesBlock);
+      } else {
+        const noRuleEl = document.createElement("div");
+        noRuleEl.style.cssText = "margin-top:4px; font-size:11px; color:#16a34a;";
+        noRuleEl.textContent = `No rules fired out of ${evalData.totalChecksCount || 5} checks.`;
+        checksList.appendChild(noRuleEl);
+      }
+    }
+
+    // 4. Fields Table (Masked values only)
+    const tableBody = document.getElementById("fields-table-body");
+    if (tableBody) {
+      tableBody.innerHTML = "";
+      const fields = evalData.fieldsTable || [];
+      if (fields.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:8px 0;">No input fields detected on page</td></tr>`;
+      } else {
+        fields.forEach(f => {
+          const tr = document.createElement("tr");
+
+          const tdName = document.createElement("td");
+          tdName.textContent = f.label || f.name || f.id;
+          tdName.title = `ID: ${f.id}, Name: ${f.name}`;
+
+          const tdType = document.createElement("td");
+          const typeSpan = document.createElement("span");
+          typeSpan.className = "type-pill";
+          typeSpan.textContent = f.detectedType;
+          tdType.appendChild(typeSpan);
+
+          const tdConf = document.createElement("td");
+          tdConf.textContent = `${Math.round(f.confidence * 100)}%`;
+
+          const tdEvidence = document.createElement("td");
+          tdEvidence.textContent = f.evidence || "-";
+          tdEvidence.title = f.evidence;
+
+          tr.appendChild(tdName);
+          tr.appendChild(tdType);
+          tr.appendChild(tdConf);
+          tr.appendChild(tdEvidence);
+          tableBody.appendChild(tr);
+        });
+      }
+    }
   }
 
   // Fetch server provider mode for honest disclosure

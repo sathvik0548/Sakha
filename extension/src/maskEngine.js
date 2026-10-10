@@ -147,6 +147,101 @@ export function maskSensitiveText(text) {
   return result;
 }
 
+// Generic Sensitive Attribute Heuristics
+export const GENERIC_FIELD_PATTERNS = {
+  AADHAAR: /aadhaar|aadhar|uidai/i,
+  PAN: /pan[_\-\s]?(number|no|card)?/i,
+  CARD: /card[_\-\s]?(number|no)?|credit|debit|cvv|cvc|expiry|exp/i,
+  BANK_ACCOUNT: /bank[_\-\s]?acc|account[_\-\s]?no|account[_\-\s]?number/i,
+  IFSC: /ifsc/i,
+  OTP_PIN: /otp|one[_\-\s]?time[_\-\s]?password|upi[_\-\s]?pin|atm[_\-\s]?pin|mpin/i,
+  PHONE: /phone|mobile|tel|cell/i,
+  UPI: /upi[_\-\s]?(id|vpa)?/i,
+  PASSWORD: /password|passcode/i
+};
+
+export const SENSITIVE_FIELD_RE = /aadhaar|aadhar|pan[_\-\s]?(number|no|card)?|bank[_\-\s]?acc|account[_\-\s]?no|account[_\-\s]?number|ifsc|card[_\-\s]?(number|no)?|credit|debit|cvv|cvc|otp|passport|voter|driving|licence|license|ssn|upi|mpin/i;
+
+/**
+ * Generic Field Classifier
+ * Checks label, name, id, placeholder, autocomplete, aria attributes, nearby text, and values
+ */
+export function classifyGenericField(fieldInfo) {
+  const {
+    name = "",
+    id = "",
+    placeholder = "",
+    autocomplete = "",
+    ariaLabel = "",
+    type = "",
+    label = "",
+    nearbyText = "",
+    value = ""
+  } = fieldInfo;
+
+  const combinedEvidence = `${label} ${ariaLabel} ${name} ${id} ${placeholder} ${autocomplete} ${nearbyText}`.trim();
+  const cleanVal = (value || "").trim();
+
+  // 1. Check Value Validators First (highest confidence if value present)
+  if (cleanVal) {
+    const rawVal = cleanVal.replace(/[\s\-]/g, "");
+    if (rawVal.length === 12 && /^[2-9]\d{11}$/.test(rawVal) && verhoeffCheck(rawVal)) {
+      return { type: "AADHAAR", confidence: 0.99, evidence: "Value verified by Verhoeff checksum algorithm" };
+    }
+    if (validatePAN(cleanVal)) {
+      return { type: "PAN", confidence: 0.98, evidence: "Value matches standard Income Tax PAN format" };
+    }
+    if (luhnCheck(rawVal)) {
+      return { type: "CARD", confidence: 0.98, evidence: "Value verified by Luhn checksum algorithm" };
+    }
+    if (validateIFSC(cleanVal)) {
+      return { type: "IFSC", confidence: 0.96, evidence: "Value matches RBI IFSC code structure" };
+    }
+    if (validateUPI(cleanVal)) {
+      return { type: "UPI", confidence: 0.95, evidence: "Value matches UPI VPA pattern" };
+    }
+    if (validateIndianMobile(cleanVal)) {
+      return { type: "PHONE", confidence: 0.92, evidence: "Value matches Indian mobile phone format" };
+    }
+  }
+
+  // 2. Attribute and Contextual Evidence
+  if (type === "password") {
+    if (GENERIC_FIELD_PATTERNS.OTP_PIN.test(combinedEvidence)) {
+      return { type: "OTP_PIN", confidence: 0.95, evidence: `PIN/OTP requested in password input: "${combinedEvidence.slice(0, 40)}"` };
+    }
+    return { type: "PASSWORD", confidence: 0.92, evidence: `Password type field: "${combinedEvidence.slice(0, 40)}"` };
+  }
+
+  for (const [fieldType, pattern] of Object.entries(GENERIC_FIELD_PATTERNS)) {
+    if (pattern.test(combinedEvidence)) {
+      return {
+        type: fieldType,
+        confidence: 0.88,
+        evidence: `Matched keyword pattern in attributes: "${combinedEvidence.slice(0, 40)}"`
+      };
+    }
+  }
+
+  return {
+    type: "UNCLASSIFIED",
+    confidence: 0.20,
+    evidence: combinedEvidence ? `Standard input element: "${combinedEvidence.slice(0, 30)}"` : "Standard input element without explicit sensitive attributes"
+  };
+}
+
+export function isSensitiveFieldByAttr(input) {
+  const attrs = [
+    input.name, 
+    input.id, 
+    input.placeholder, 
+    input.getAttribute("autocomplete"), 
+    input.getAttribute("aria-label"),
+    input.getAttribute("aria-labelledby")
+  ];
+  return attrs.some(a => a && SENSITIVE_FIELD_RE.test(a));
+}
+
 /**
  * Apply live DOM Masking Overlay on any webpage (Content script context)
  */
@@ -157,14 +252,6 @@ export function applyPageMasking(documentRoot = document, lang = "en") {
   let maskedTextNodes = 0;
 
   // 1. Mask Input Fields (Visual overlay only - DOES NOT MUTATE input.value)
-  //    Sensitive fields are also masked when empty, based on name/id/placeholder attributes.
-  const SENSITIVE_FIELD_RE = /aadhaar|aadhar|pan[_\-\s]?(number|no|card)?|bank[_\-\s]?acc|account[_\-\s]?no|account[_\-\s]?number|ifsc|card[_\-\s]?(number|no)?|credit|debit|cvv|cvc|otp|passport|voter|driving|licence|license|ssn|upi/i;
-
-  function isSensitiveFieldByAttr(input) {
-    const attrs = [input.name, input.id, input.placeholder, input.getAttribute("autocomplete"), input.getAttribute("aria-label")];
-    return attrs.some(a => a && SENSITIVE_FIELD_RE.test(a));
-  }
-
   const inputs = documentRoot.querySelectorAll("input:not([type='hidden']):not([type='submit']):not([type='button'])");
   inputs.forEach((input) => {
     if (input.getAttribute("data-sakha-monitored")) return;

@@ -6,7 +6,7 @@
     "genuine": 21,
     "detectionRate": 100,
     "falseAlarmRate": 0,
-    "avgLatencyMs": 0.14964580952380976,
+    "avgLatencyMs": 0.1407727380952383,
     "misses": [],
     "falseAlarms": []
   },
@@ -17,7 +17,7 @@
     "genuine": 9,
     "detectionRate": 100,
     "falseAlarmRate": 0,
-    "avgLatencyMs": 0.06750244444444478,
+    "avgLatencyMs": 0.07216672222222126,
     "misses": [],
     "falseAlarms": []
   }

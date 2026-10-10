@@ -44,6 +44,13 @@
   background-color: #ffffff !important;
 }
 
+/* Analyzed Field Removable Highlight Outline */
+.sakha-analyzed-outline {
+  outline: 2px dashed #0284c7 !important;
+  outline-offset: 2px !important;
+  transition: outline 0.2s ease-in-out !important;
+}
+
 /* 2. High-Contrast Senior Citizen Scam Warning Modal Overlay */
 #sakha-alert-modal-root {
   position: fixed !important;

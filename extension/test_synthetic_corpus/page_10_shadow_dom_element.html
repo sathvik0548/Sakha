@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Component Verification (DEMO - NOT A REAL SITE)</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .demo-banner { background: #fef08a; padding: 8px; font-weight: bold; margin-bottom: 12px; }
+    input { display: block; margin-bottom: 8px; padding: 6px; width: 280px; }
+  </style>
+</head>
+<body>
+  
+    <div class="demo-banner">DEMO - NOT A REAL SITE</div>
+    <div id="host-element"></div>
+    <script>
+      const host = document.getElementById("host-element");
+      const shadow = host.attachShadow({ mode: "open" });
+      shadow.innerHTML = `
+        <div class="shadow-inner">
+          <label>Aadhaar Identity: <input type="text" id="shadow_aadhaar" name="shadow_aadhaar" /></label>
+          <label>IFSC Branch: <input type="text" id="shadow_ifsc" name="shadow_ifsc" /></label>
+        </div>
+      `;
+    </script>
+</body>
+</html>

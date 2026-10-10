@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Parent Portal with Frame (DEMO - NOT A REAL SITE)</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .demo-banner { background: #fef08a; padding: 8px; font-weight: bold; margin-bottom: 12px; }
+    input { display: block; margin-bottom: 8px; padding: 6px; width: 280px; }
+  </style>
+</head>
+<body>
+  
+    <div class="demo-banner">DEMO - NOT A REAL SITE</div>
+    <iframe id="inner-frame" srcdoc='
+      <!DOCTYPE html><html><body>
+        <form>
+          <input type="text" placeholder="Aadhaar Number" name="frame_aadhaar" />
+          <input type="text" placeholder="PAN Card" name="frame_pan" />
+        </form>
+      </body></html>
+    '></iframe>
+</body>
+</html>

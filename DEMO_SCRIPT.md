@@ -52,7 +52,7 @@
   Click **"What is this page asking me?" / "ఈ పేజీ నన్ను ఏమి అడుగుతోంది?"**
 - **Visual:**  
   A clear 2-sentence summary appears explaining the form without technical complexity.  
-  Click **"Download Pilot Telemetry (Zero PII CSV)"** — download initiates instantly with zero personal data.
+  Click **"Download pilot log (no personal fields recorded)"** — download initiates instantly with zero personal fields or query parameters.
 - **Speaker:**  
   *"Everything you just witnessed ran locally on this laptop with sub-millisecond latency. No cloud dependencies, no surveillance, pure on-device protection for a Secure Bharat."*
 

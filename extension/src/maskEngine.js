@@ -157,6 +157,14 @@ export function applyPageMasking(documentRoot = document, lang = "en") {
   let maskedTextNodes = 0;
 
   // 1. Mask Input Fields (Visual overlay only - DOES NOT MUTATE input.value)
+  //    Sensitive fields are also masked when empty, based on name/id/placeholder attributes.
+  const SENSITIVE_FIELD_RE = /aadhaar|aadhar|pan[_\-\s]?(number|no|card)?|bank[_\-\s]?acc|account[_\-\s]?no|account[_\-\s]?number|ifsc|card[_\-\s]?(number|no)?|credit|debit|cvv|cvc|otp|passport|voter|driving|licence|license|ssn|upi/i;
+
+  function isSensitiveFieldByAttr(input) {
+    const attrs = [input.name, input.id, input.placeholder, input.getAttribute("autocomplete"), input.getAttribute("aria-label")];
+    return attrs.some(a => a && SENSITIVE_FIELD_RE.test(a));
+  }
+
   const inputs = documentRoot.querySelectorAll("input:not([type='hidden']):not([type='submit']):not([type='button'])");
   inputs.forEach((input) => {
     if (input.getAttribute("data-sakha-monitored")) return;
@@ -164,15 +172,15 @@ export function applyPageMasking(documentRoot = document, lang = "en") {
 
     const checkAndMaskInput = () => {
       const val = input.value;
-      if (!val) return;
-      const spans = identifySensitiveSpans(val);
-      if (spans.length > 0) {
-        // Apply blur style directly to input when not focused
-        const activeEl = documentRoot.activeElement || (typeof document !== "undefined" ? document.activeElement : null);
-        if (activeEl !== input) {
-          input.classList.add("sakha-masked-input");
-          input.title = t("masked_badge", lang);
-        }
+      const activeEl = documentRoot.activeElement || (typeof document !== "undefined" ? document.activeElement : null);
+      if (activeEl === input) return; // never blur a focused field
+
+      const sensitiveByValue = val && identifySensitiveSpans(val).length > 0;
+      const sensitiveByAttr = isSensitiveFieldByAttr(input);
+
+      if (sensitiveByValue || sensitiveByAttr) {
+        input.classList.add("sakha-masked-input");
+        input.title = t("masked_badge", lang);
         maskedInputs++;
       } else {
         input.classList.remove("sakha-masked-input");

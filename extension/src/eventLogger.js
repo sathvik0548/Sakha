@@ -16,12 +16,31 @@
 const STORAGE_KEY = "sakha_pilot_logs";
 
 export async function logPilotEvent(eventType, payload = {}) {
+  // Sanitize domain to strictly hostname (strip any paths or query params)
+  let rawDomain = payload.domain || (typeof window !== "undefined" ? window.location?.hostname : "") || "unknown";
+  try {
+    if (rawDomain.includes("://") || rawDomain.includes("?")) {
+      const parsed = new URL(rawDomain.startsWith("http") ? rawDomain : `https://${rawDomain}`);
+      rawDomain = parsed.hostname;
+    }
+  } catch {
+    rawDomain = rawDomain.split("?")[0].split("/")[0];
+  }
+
+  // Remove any raw values or query parameters from payload
+  const safePayload = { ...payload };
+  delete safePayload.url;
+  delete safePayload.value;
+  delete safePayload.inputValue;
+  delete safePayload.text;
+  safePayload.domain = rawDomain;
+
   const event = {
     id: "evt_" + Math.random().toString(36).slice(2, 9),
     timestamp: new Date().toISOString(),
     eventType,
-    domain: payload.domain || window.location?.hostname || "unknown",
-    ...payload
+    domain: rawDomain,
+    ...safePayload
   };
 
   try {

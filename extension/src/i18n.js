@@ -30,9 +30,11 @@ export const STRINGS = {
     consent_body: "Sakha stays completely on your device. Your Aadhaar, cards, and personal details are never sent to any server.",
     consent_agree: "I Agree & Start Protection",
     
+    rule_safe_detail: "No scam or deceptive patterns detected on this site.",
+
     loading_explanation: "Checking what this page is asking safely...",
     explain_error: "Could not explain this page right now.",
-    explain_offline: "Helper is resting. The optional explanation helper needs the local assistant server running. Your on-device safety remains active.",
+    explain_offline: "Explanation helper is not running. Start the local server to use this feature. Warnings and masking always run on this device — only the Explain summary sends masked text to the cloud.",
     explain_safe_summary: "Page Summary:",
 
     state_unsupported_page: "Sakha stays idle on internal browser pages. You are safe here.",
@@ -64,9 +66,11 @@ export const STRINGS = {
     consent_body: "సఖ మీ పరికరంలోనే పనిచేస్తుంది. మీ ఆధార్, బ్యాంక్ కార్డ్ వివరాలు ఏ సర్వర్‌కు పంపబడవు.",
     consent_agree: "నేను అంగీకరిస్తున్నాను - రక్షణ ప్రారంభించండి",
     
+    rule_safe_detail: "ఈ సైట్‌లో మోసం లేదా మోసపూరిత నమూనాలు కనుగొనబడలేదు.",
+
     loading_explanation: "పేజీ వివరాలను సురక్షితంగా పరిశీలిస్తున్నాము...",
     explain_error: "ప్రస్తుతం ఈ పేజీని వివరించడం సాధ్యం కాలేదు.",
-    explain_offline: "సహాయకుడు విశ్రాంతిలో ఉన్నారు. ఈ అదనపు వివరణకు స్థానిక సహాయక సర్వర్ అవసరం. మీ పరికర భద్రత ఎల్లప్పుడూ పనిచేస్తుంది.",
+    explain_offline: "వివరణ సహాయకుడు అందుబాటులో లేడు. స్థానిక సర్వర్‌ను ప్రారంభించండి. హెచ్చరికలు మరియు మాస్కింగ్ ఎప్పుడూ మీ పరికరంలోనే పనిచేస్తాయి — వివరణ మాత్రమే మాస్క్ చేసిన వచనాన్ని క్లౌడ్‌కు పంపుతుంది.",
     explain_safe_summary: "పేజీ సారాంశం:",
 
     state_unsupported_page: "బ్రౌజర్ అంతర్గత పేజీలలో సఖ విశ్రాంతిగా ఉంటుంది. ఇక్కడ మీరు సురక్షితంగా ఉన్నారు.",
@@ -98,9 +102,11 @@ export const STRINGS = {
     consent_body: "सखा पूरी तरह से आपके डिवाइस पर ही काम करता है। आपका आधार, कार्ड विवरण कभी किसी सर्वर पर नहीं भेजे जाते।",
     consent_agree: "मैं सहमत हूँ - सुरक्षा शुरू करें",
     
+    rule_safe_detail: "इस साइट पर कोई धोखाधड़ी या भ्रामक पैटर्न नहीं मिला।",
+
     loading_explanation: "पेज का सुरक्षित रूप से विश्लेषण किया जा रहा है...",
     explain_error: "इस समय पेज की व्याख्या नहीं की जा सकी।",
-    explain_offline: "सहायक अभी उपलब्ध नहीं है। इस अतिरिक्त व्याख्या के लिए स्थानीय सर्वर चाहिए। आपकी डिवाइस सुरक्षा हमेशा सक्रिय है।",
+    explain_offline: "व्याख्या सहायक उपलब्ध नहीं है। इस सुविधा के लिए स्थानीय सर्वर शुरू करें। चेतावनियाँ और मास्किंग हमेशा इस डिवाइस पर चलती हैं — केवल Explain सारांश क्लाउड को मास्क किया हुआ टेक्स्ट भेजता है।",
     explain_safe_summary: "पेज सारांश:",
 
     state_unsupported_page: "ब्राउज़र के आंतरिक पेजों पर सखा निष्क्रिय रहता है। आप यहाँ सुरक्षित हैं।",
@@ -110,9 +116,22 @@ export const STRINGS = {
 };
 
 /**
- * Helper to fetch localized string with fallback to English
+ * Helper to fetch localized string with safe fallback to English
+ * Never returns a raw key name to end-users.
  */
 export function t(key, lang = "en") {
   const dict = STRINGS[lang] || STRINGS.en;
-  return dict[key] || STRINGS.en[key] || key;
+  if (dict && typeof dict[key] === "string" && dict[key].length > 0) {
+    return dict[key];
+  }
+  if (STRINGS.en && typeof STRINGS.en[key] === "string" && STRINGS.en[key].length > 0) {
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn(`[Sakha i18n] Missing key "${key}" for locale "${lang}". Falling back to English.`);
+    }
+    return STRINGS.en[key];
+  }
+  if (typeof console !== "undefined" && console.warn) {
+    console.warn(`[Sakha i18n] Unknown translation key "${key}" requested for locale "${lang}".`);
+  }
+  return "";
 }

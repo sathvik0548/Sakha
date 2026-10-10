@@ -284,7 +284,17 @@ if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
     }
 
     if (msg.type === "GET_PAGE_SAFETY") {
-      sendResponse({ evaluation: pageEvaluation });
+      // Re-query current masked count on page
+      const currentMaskedInputs = document.querySelectorAll(".sakha-masked-input").length;
+      const currentMaskedText = document.querySelectorAll(".sakha-blurred").length;
+      sendResponse({ 
+        evaluation: pageEvaluation,
+        maskStats: {
+          maskedInputs: currentMaskedInputs,
+          maskedTextNodes: currentMaskedText,
+          totalMasked: currentMaskedInputs + currentMaskedText
+        }
+      });
       return true;
     }
 

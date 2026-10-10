@@ -58,6 +58,17 @@ Tested against 60 synthetic pages (30 scam, 30 genuine) divided into 70% Tuning 
    `/Users/sathvikbadam/Desktop/Sakha/sakha-sfic/extension`
 4. The extension **Sakha (సఖ)** will appear in your toolbar.
 
+### Extension Architecture & Build Pipeline
+- **Source Files:** The source modules reside in `extension/src/` (`src/popup.js`, `src/i18n.js`, `src/scamDetector.js`, `src/maskEngine.js`, `src/eventLogger.js`, `src/content_sakha.js`).
+- **Build Pipeline:** `extension/build.js` uses `esbuild` to bundle ESM entry points into root files loaded by Chrome (`popup.js`, `content.js`, `background.js`, `settings.js`, `offscreen.js`).
+- **Rebuilding:**
+  ```bash
+  cd extension
+  node build.js          # single build
+  node build.js --watch  # auto-rebuild on file changes
+  ```
+- **Single Source of Truth:** Do not edit root `extension/popup.js` directly; edit `extension/src/popup.js` and build.
+
 ### 2. Run Test Suites & Evaluation
 ```bash
 cd sakha-sfic

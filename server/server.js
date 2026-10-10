@@ -9,17 +9,17 @@
 
 require("dotenv").config();
 const express = require("express");
-const cors    = require("cors");
-const path    = require("path");
+const cors = require("cors");
+const path = require("path");
 const { validateAgentRequestV1 } = require("../schema/AgentRequestV1");
 const AnthropicProvider = require("./providers/AnthropicProvider");
-const GroqProvider      = require("./providers/GroqProvider");
-const GeminiProvider    = require("./providers/GeminiProvider");
-const GroqTextProvider  = require("./providers/GroqTextProvider");
-const OllamaProvider    = require("./providers/OllamaProvider");
+const GroqProvider = require("./providers/GroqProvider");
+const GeminiProvider = require("./providers/GeminiProvider");
+const GroqTextProvider = require("./providers/GroqTextProvider");
+const OllamaProvider = require("./providers/OllamaProvider");
 const { logMetric } = require("./utils/logger");
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // API key verification check (without logging key value)
@@ -65,7 +65,7 @@ app.use(
         ) {
           isAllowed = true;
         }
-      } catch (e) {}
+      } catch (e) { }
       // Always allow or fallback safely without throwing an unhandled 500
       callback(null, isAllowed ? true : true);
     },
@@ -122,6 +122,18 @@ app.get([
 let demoMetrics = {
   runs: 0,
   totalLatency: 0,
+};
+// ---------------------------------------------------------------------------
+// GET /api/provider — Expose active VLM/LLM mode and provider identity
+// ---------------------------------------------------------------------------
+app.get("/api/provider", (req, res) => {
+  return res.json({
+    mode: activeMode, // "cloud" | "offline"
+    provider: activeMode === "offline" ? "OllamaProvider" : "GroqProvider",
+    endpoint: "http://localhost:3000/api/explain"
+  });
+});
+
 // ---------------------------------------------------------------------------
 // POST /api/explain — Senior citizen plain language explanation (Masked Text Only)
 // ---------------------------------------------------------------------------
@@ -142,21 +154,31 @@ app.post("/api/explain", async (req, res) => {
   try {
     if (activeProvider && typeof activeProvider.generateText === "function") {
       const response = await activeProvider.generateText(`${systemPrompt}\n\nPage text:\n${text}`);
-      return res.json({ explanation: response });
+      if (response && response.trim().length > 0) {
+        return res.json({ 
+          explanation: response.trim(), 
+          is_ai_output: true,
+          mode: activeMode
+        });
+      }
     }
   } catch (err) {
-    console.warn("[Server] LLM Provider explain failed, falling back to heuristic summary:", err.message);
+    console.warn("[Server] LLM Provider explain failed:", err.message);
   }
 
-  // Robust deterministic fallback summary (Cold-start or offline safe)
-  let fallback;
-  if (isTelugu) {
-    fallback = "ఈ పేజీ మీ వివరాలను (పేరు లేదా చెల్లింపు సమాచారం) అడుగుతోంది. మీరు అధికారిక సైట్‌లో ఉన్నారని ధృవీకరించుకోండి మరియు ఎవరితోనూ పాస్‌వర్డ్ లేదా పిన్ పంచుకోవద్దు.";
-  } else {
-    fallback = "This page is requesting information from you. Please ensure this is an official trusted website, and never share any passwords or PIN numbers.";
-  }
+  // Model call failed or offline — NEVER return canned text as if it were AI output.
+  const safetyTip = isTelugu
+    ? "అధికారిక వెబ్‌సైట్ అని నిర్ధారించుకోకుండా పాస్‌వర్డ్ లేదా పిన్ ఎవరితోనూ పంచుకోవద్దు."
+    : "Confirm this is an official website before sharing any passwords, PINs, or sensitive credentials.";
 
-  return res.json({ explanation: fallback });
+  return res.status(503).json({
+    error: isTelugu 
+      ? "AI సహాయకుడు ప్రస్తుతం ఆఫ్‌లైన్‌లో ఉన్నారు." 
+      : "AI explanation helper is currently offline.",
+    safety_reminder: safetyTip,
+    is_ai_output: false,
+    mode: activeMode
+  });
 });
 
 app.post("/analyze", async (req, res) => {
@@ -193,19 +215,19 @@ app.post("/analyze", async (req, res) => {
   try {
     const planResult = await activeProvider.analyze(req.body);
     const latencyMs = Date.now() - startTime;
-    
+
     const planSteps = Array.isArray(planResult.plan) ? planResult.plan.length : 0;
     const isDone = planSteps === 0;
     console.log(`[Server] Plan returned in ${latencyMs}ms: ${planSteps} step(s). Done=${isDone}`);
     if (planResult.plan) {
-      planResult.plan.forEach(s => console.log(`  Step ${s.step}: ${s.action} ${s.target_id} (${s.field_type || ''}) value=${s.value !== null ? '"'+s.value+'"' : 'null (client fills)'}`));
+      planResult.plan.forEach(s => console.log(`  Step ${s.step}: ${s.action} ${s.target_id} (${s.field_type || ''}) value=${s.value !== null ? '"' + s.value + '"' : 'null (client fills)'}`));
     }
     logMetric(task_instruction, planResult, latencyMs);
-    
+
     if (isDone && demo_mode) {
       const avgLatency = demoMetrics.runs > 0 ? Math.round(demoMetrics.totalLatency / demoMetrics.runs) : 0;
       const expectedTotal = 5 * demoMetrics.runs;
-      
+
       console.log(`\n======================================================`);
       console.log(`📊 DEMO METRICS REPORT`);
       console.log(`======================================================`);
@@ -214,10 +236,10 @@ app.post("/analyze", async (req, res) => {
       console.log(`PII Recall            : ${demoMetrics.manifestRegions} / ${expectedTotal} regions expected`);
       console.log(`Visual Redaction      : 100% (Physical Black Boxes)`);
       console.log(`======================================================\n`);
-      
+
       demoMetrics = { runs: 0, totalLatency: 0, manifestRegions: 0 };
     }
-    
+
     return res.json(planResult);
   } catch (error) {
     const msg = (error && error.message) ? error.message : String(error);
@@ -228,7 +250,7 @@ app.post("/analyze", async (req, res) => {
     } else if (msg.includes("invalid response") || msg.includes("malformed JSON") || msg.includes("Unexpected token")) {
       userMsg = "Local model returned an invalid response";
     } else if (msg.includes("fetch") || msg.includes("ECONNREFUSED") || msg.includes("network") || msg.includes("connection error")) {
-      userMsg = activeMode === "offline" 
+      userMsg = activeMode === "offline"
         ? "Couldn't reach local Ollama on http://127.0.0.1:11434 \u2014 check Ollama is running with `ollama serve`."
         : "Couldn't reach the reasoning server \u2014 check your internet or provider status.";
     } else if (msg.includes("4MB") || msg.includes("Too Large")) {

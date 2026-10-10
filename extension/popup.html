@@ -218,17 +218,17 @@
     </div>
 
     <div class="features-list">
-      <div class="feature-item">
+      <div class="feature-item" id="feature-masking">
         <span aria-hidden="true">🔒</span>
-        <span>Aadhaar, PAN & Cards Blurred On-Screen</span>
+        <span id="feature-masking-text">Checking for sensitive fields on page...</span>
       </div>
       <div class="feature-item">
         <span aria-hidden="true">🚫</span>
         <span>Scam & Typosquatting Warning Active</span>
       </div>
-      <div class="feature-item">
+      <div class="feature-item" id="feature-privacy">
         <span aria-hidden="true">📲</span>
-        <span>Zero Personal Data Leaves Device</span>
+        <span id="feature-privacy-text">Warnings &amp; masking run on this device. Explain sends only masked text to cloud.</span>
       </div>
     </div>
 
@@ -240,7 +240,7 @@
     <div id="explain-output" class="explain-box"></div>
 
     <div class="pilot-export">
-      <button id="btn-export-logs" class="btn-export-link">Download Pilot Telemetry (Zero PII CSV)</button>
+      <button id="btn-export-logs" class="btn-export-link">Download pilot log (no personal fields recorded)</button>
     </div>
   </main>
 
